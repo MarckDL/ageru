@@ -1,0 +1,9 @@
+
+# Dependencias de ambos
+node_modules/
+.angular/
+dist/
+out-tsc/
+
+# Variables de entorno (¡Súper importante!)
+.env
