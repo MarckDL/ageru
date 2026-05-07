@@ -16,7 +16,47 @@ Sistema de gestión y visualización de datos desarrollado como proyecto de inst
 
 ## ⚙️ Configuración Inicial
 
-### 1. Clonar el repositorio
+### 1. Clonar el repositorio (rama experimental)
+
 ```bash
-git clone [https://github.com/TU_USUARIO/Ageru.git](https://github.com/TU_USUARIO/Ageru.git)
-cd Ageru
+git clone https://github.com/MarckDL/ageru.git
+cd ageru
+git checkout ageru-experimental
+```
+
+### 2. Instalar dependencias
+
+```bash
+cd backend
+pnpm install
+
+cd ../frontend
+pnpm install
+```
+
+### 3. Configurar la base de datos
+
+1. Abrir el archivo `sql/Ageru_SCRIPT.sql` en tu herramienta de SQL Server (SSMS, Azure Data Studio, etc.).
+2. Ejecutar el script para crear la base de datos `Ageru_Chan` y sus tablas.
+3. Crear un archivo `.env` dentro de `/backend` con las credenciales de tu instancia de SQL Server:
+
+```bash
+DB_USER=tu_usuario
+DB_PASSWORD=tu_password
+DB_SERVER=tu_servidor
+DB_DATABASE=Ageru_Chan
+```
+
+### 4. Levantar backend y frontend
+
+En dos terminales separadas:
+
+```bash
+# Terminal 1 - Backend
+cd backend
+node server.js
+
+# Terminal 2 - Frontend
+cd frontend
+pnpm start
+```
