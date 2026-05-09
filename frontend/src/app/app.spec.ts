@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { RouterTestingHarness, RouterTestingModule } from '@angular/router/testing';
 import { routes } from './app.routes';
-import { UsuariosService } from './usuarios.service';
+import { UsuariosService } from './features/usuarios/services/usuarios.service';
 import { of } from 'rxjs';
 
 describe('App routing', () => {

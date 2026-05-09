@@ -1,30 +1,165 @@
-# 🚀 Ageru - Sistema de Pagos (Sprint 0)
+# Ageru - Sistema de Pagos (Sprint 0)
 
-Sistema de gestión y visualización de datos desarrollado como proyecto de instituto, inspirado en plataformas de pago como Yape.
+Sistema de gestion y visualizacion de datos, inspirado en plataformas de pago como Yape.
 
-## 🛠️ Stack Tecnológico
+## Stack Tecnologico
 
-- **Frontend:** Angular 19+, Tailwind CSS 4, Highcharts.
-- **Backend:** Node.js, Express.
+- **Frontend:** Angular.
+- **Backend:** Node.js + Express.
 - **Base de Datos:** Microsoft SQL Server.
-- **Gestión de Paquetes:** pnpm.
+- **Gestor de paquetes:** pnpm.
 
-## 📁 Estructura del Proyecto
+## Estructura General
 
-- `/backend`: Servidor API REST con conexión a SQL Server.
-- `/frontend`: Aplicación SPA con Angular y estilos optimizados.
-
-## ⚙️ Configuración Inicial
-
-### 1. Clonar el repositorio (rama experimental)
-
-```bash
-git clone https://github.com/MarckDL/ageru.git
-cd ageru
-git checkout ageru-experimental
+```text
+Ageru-Test/
+├─ frontend/
+├─ backend/
+└─ sql/
 ```
 
-### 2. Instalar dependencias
+## Frontend: como organizar paginas y componentes
+
+La app frontend usa arquitectura por **features** (modulos funcionales).
+
+```text
+frontend/src/
+├─ app/
+│  ├─ core/                        # Servicios globales, guards, interceptores
+│  │  ├─ auth/auth.service.ts
+│  │  └─ guards/auth.guard.ts
+│  ├─ shared/                      # Componentes reutilizables globales
+│  ├─ features/
+│  │  ├─ landing/
+│  │  │  └─ pages/landing.page.ts
+│  │  ├─ auth/
+│  │  │  └─ pages/login.page.ts
+│  │  ├─ dashboard/
+│  │  │  └─ pages/dashboard.page.ts
+│  │  └─ usuarios/
+│  │     ├─ pages/usuarios.page.ts
+│  │     ├─ components/usuarios-table.component.ts
+│  │     ├─ services/usuarios.service.ts
+│  │     └─ models/usuario.model.ts
+│  ├─ app.ts
+│  ├─ app.config.ts
+│  └─ app.routes.ts
+└─ environments/
+   ├─ environment.ts
+   └─ environment.prod.ts
+```
+
+### Donde se crea cada cosa
+
+- **Pagina (vista completa):** `app/features/<feature>/pages/`
+  - Ejemplos: `login.page.ts`, `dashboard.page.ts`, `landing.page.ts`.
+- **Componentes de una pagina:** `app/features/<feature>/components/`
+  - Ejemplo: `usuarios-table.component.ts`.
+- **Modelos/Tipos:** `app/features/<feature>/models/`.
+- **Servicios HTTP de una feature:** `app/features/<feature>/services/`.
+- **Componentes compartidos por todo el sistema:** `app/shared/`.
+
+### Como se cargan las paginas (app.ts o app.routes.ts?)
+
+- `app.ts` solo contiene el contenedor raiz (`<router-outlet>`).
+- **Las paginas se registran en `app.routes.ts`**.
+- Angular muestra la pagina segun la URL.
+
+### Flujo de autenticacion (guard) implementado
+
+Se dejo un flujo base para que entiendas el patron:
+
+1. `AuthService` (`app/core/auth/auth.service.ts`) consume el backend de auth (`register/login/me/logout`) y guarda/elimina token en `localStorage`.
+2. `authGuard` (`app/core/guards/auth.guard.ts`) valida sesion llamando al backend (`GET /api/auth/me`).
+3. Si no hay sesion y entras a una ruta protegida, redirige a `/login`.
+4. Si hay sesion, deja pasar.
+
+Ruta protegida actualmente:
+- `/dashboard` (usa `canActivate: [authGuard]` en `app.routes.ts`).
+
+Como probarlo:
+1. Entra a `/dashboard` sin login -> te manda a `/login`.
+2. En `/login`, usa la pestaña **Registrarme** para crear cuenta si no tienes.
+3. Luego vuelve a **Iniciar sesion** y entra con tu usuario/password.
+4. En `/dashboard`, pulsa **Cerrar sesion** -> limpia token y vuelve a `/login`.
+
+Ejemplo actual de rutas:
+- `/` -> landing
+- `/login` -> login
+- `/dashboard` -> dashboard
+- `/usuarios` -> usuarios
+
+### Ejemplo: crear una nueva pagina
+
+Si quieres crear una pagina `perfil`:
+
+1. Crea la carpeta: `app/features/perfil/pages/`.
+2. Crea `perfil.page.ts`.
+3. Si necesita UI interna reutilizable, crea `app/features/perfil/components/`.
+4. Agrega la ruta en `app.routes.ts`, por ejemplo:
+   - `{ path: 'perfil', component: PerfilPage }`
+
+## Backend: como organizar API por modulos
+
+El backend esta separado por capas para evitar mezclar rutas con SQL.
+
+```text
+backend/
+├─ src/
+│  ├─ app.js                       # Configura Express y middlewares
+│  ├─ server.js                    # Arranque del servidor
+│  ├─ config/
+│  │  └─ db.js                     # Conexion SQL Server
+│  ├─ routes/
+│  │  └─ index.js                  # Registro global de modulos API
+│  ├─ middlewares/
+│  │  ├─ not-found.js
+│  │  └─ error-handler.js
+│  └─ modules/
+│     ├─ usuarios/
+│        ├─ usuarios.routes.js
+│        ├─ usuarios.controller.js
+│        ├─ usuarios.service.js
+│        └─ usuarios.repository.js
+│     └─ auth/
+│        ├─ auth.routes.js
+│        ├─ auth.controller.js
+│        └─ auth.service.js
+└─ server.js                       # Punto de entrada compatible (require src/server)
+```
+
+### Flujo recomendado en backend
+
+1. `routes` recibe request HTTP.
+2. `controller` adapta request/response.
+3. `service` contiene reglas de negocio.
+4. `repository` ejecuta consultas SQL.
+
+Asi puedes mantener el codigo limpio y escalar sin caos.
+
+### Ejemplo: crear modulo login en backend
+
+Ya esta implementado en `src/modules/auth/`.
+
+Endpoints disponibles:
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `GET /api/auth/me` (protegido, requiere `Authorization: Bearer <token>`)
+- `POST /api/auth/logout` (protegido)
+
+`POST /api/auth/register` ahora crea en una sola transaccion:
+- `usuarios` (datos personales)
+- `auth_credenciales` (username + password hash)
+- `cuentas` (cuenta inicial en estado `ACTIVA`, saldo 0)
+
+Nota: para registrar, debe existir al menos un banco `ACTIVO` en la tabla `bancos`.
+
+Luego registra las rutas en `src/routes/index.js`, por ejemplo:
+- `router.use('/auth', authRouter);`
+
+## Configuracion inicial
+
+### 1. Instalar dependencias
 
 ```bash
 cd backend
@@ -34,11 +169,12 @@ cd ../frontend
 pnpm install
 ```
 
-### 3. Configurar la base de datos
+### 2. Configurar base de datos
 
-1. Abrir el archivo `sql/Ageru_SCRIPT.sql` en tu herramienta de SQL Server (SSMS, Azure Data Studio, etc.).
-2. Ejecutar el script para crear la base de datos `Ageru_Chan` y sus tablas.
-3. Crear un archivo `.env` dentro de `/backend` con las credenciales de tu instancia de SQL Server:
+1. Abre `sql/Ageru_SCRIPT.sql` en SQL Server.
+2. Ejecuta el script para crear `Ageru_Chan`.
+3. Ejecuta `sql/Ageru_SEED_TEST.sql` para cargar datos de prueba (usuarios, cuentas, auth, etc.).
+4. Crea `backend/.env`:
 
 ```bash
 DB_USER=tu_usuario
@@ -47,16 +183,18 @@ DB_SERVER=tu_servidor
 DB_DATABASE=Ageru_Chan
 ```
 
-### 4. Levantar backend y frontend
+Usuario de prueba despues del seed:
+- username: `marck@test.com`
+- password: `123456`
 
-En dos terminales separadas:
+### 3. Levantar backend y frontend
 
 ```bash
-# Terminal 1 - Backend
+# Terminal 1
 cd backend
-node server.js
+pnpm start
 
-# Terminal 2 - Frontend
+# Terminal 2
 cd frontend
 pnpm start
 ```
