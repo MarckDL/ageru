@@ -7,3 +7,6 @@ out-tsc/
 
 # Variables de entorno (¡Súper importante!)
 .env
+
+# Logs locales de servidores lanzados por Codex
+.codex-server*.log

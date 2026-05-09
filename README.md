@@ -1,4 +1,4 @@
-# Ageru - Sistema de Pagos (Sprint 0)
+# Ageru - Sistema de Pagos (Sprint 2)
 
 Sistema de gestion y visualizacion de datos, inspirado en plataformas de pago como Yape.
 
@@ -157,6 +157,42 @@ Nota: para registrar, debe existir al menos un banco `ACTIVO` en la tabla `banco
 Luego registra las rutas en `src/routes/index.js`, por ejemplo:
 - `router.use('/auth', authRouter);`
 
+## Sprint 2: motor transaccional y pagos QR
+
+El Sprint 2 agrega el flujo operativo de dinero:
+
+- Transferencias con montos enteros en centavos (`BIGINT`) para evitar perdida de precision.
+- Validacion de saldo, limite diario, cuenta origen activa y cuenta destino activa.
+- Busqueda de destinatario por telefono o numero de cuenta.
+- Registro de transacciones con referencia unica, timestamp UTC, comprobante y notificacion simple.
+- QR abierto personal, unico por cuenta, permanente y reutilizable para recibir pagos con monto ingresado por quien escanea.
+- Pagos QR fijos con codigo opaco firmado, imagen QR, expiracion, cancelacion y consulta de estado.
+- Pago de QR con vinculacion atomica entre `pagos_qr` y `transacciones`.
+
+Endpoints nuevos:
+- `POST /api/transacciones/transferir`
+- `GET /api/transacciones`
+- `GET /api/transacciones/:id`
+- `POST /api/transacciones/:id/revertir` (admin)
+- `GET /api/pagos-qr/comercios`
+- `POST /api/pagos-qr`
+- `GET /api/pagos-qr`
+- `POST /api/pagos-qr/validar`
+- `POST /api/pagos-qr/pagar`
+- `GET /api/pagos-qr/:id`
+- `POST /api/pagos-qr/:id/cancelar`
+
+Pantallas agregadas:
+- `/dashboard/transferencias`
+- `/dashboard/pagos-qr`
+
+Cambios de base de datos para QR:
+- `pagos_qr.comercio_id` ahora permite `NULL`, porque el QR abierto personal no depende de un comercio.
+- `pagos_qr.cuenta_destino_id` identifica la cuenta/usuario que recibe el pago.
+- `pagos_qr.tipo_qr` clasifica `ABIERTO` o `FIJO`.
+- `pagos_qr.monto_centavos` permite `NULL` para QR abierto.
+- `uq_pagos_qr_abierto_cuenta` asegura un solo QR abierto activo por cuenta.
+
 ## Configuracion inicial
 
 ### 1. Instalar dependencias
@@ -175,6 +211,8 @@ pnpm install
 2. Ejecuta el script para crear `Ageru_Chan`.
 3. Ejecuta `sql/Ageru_SEED_TEST.sql` para cargar datos de prueba (usuarios, cuentas, auth, etc.).
 4. Crea `backend/.env`:
+
+Tambien puedes ejecutar directamente `sql/Ageru_COMPLETO.sql`, que consolida estructura, autenticacion, seed y los cambios de Sprint 2 en un solo archivo.
 
 ```bash
 DB_USER=tu_usuario

@@ -64,6 +64,14 @@ import { environment } from '../../../../environments/environment';
             <span class="action-icon">📋</span>
             <span class="action-label">Movimientos</span>
           </a>
+          <a routerLink="/dashboard/transferencias" class="action-card">
+            <span class="action-icon">$</span>
+            <span class="action-label">Transferencias</span>
+          </a>
+          <a routerLink="/dashboard/pagos-qr" class="action-card">
+            <span class="action-icon">QR</span>
+            <span class="action-label">Pagos QR</span>
+          </a>
           <a routerLink="/dashboard/usuarios" class="action-card">
             <span class="action-icon">👥</span>
             <span class="action-label">Usuarios</span>
@@ -166,7 +174,7 @@ import { environment } from '../../../../environments/environment';
       transform: translateY(-3px);
       box-shadow: var(--shadow-md);
     }
-    .action-icon { font-size: 1.8rem; }
+    .action-icon { font-size: 1.45rem; font-weight: 800; min-height: 2rem; }
     .action-label {
       font-size: 0.9rem;
       font-weight: 500;

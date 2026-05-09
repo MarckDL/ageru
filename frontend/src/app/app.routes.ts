@@ -6,6 +6,8 @@ import { DashboardHomePage } from './features/dashboard/pages/dashboard-home.pag
 import { PerfilPage } from './features/perfil/pages/perfil.page';
 import { CuentasPage } from './features/cuentas/pages/cuentas.page';
 import { MovimientosPage } from './features/movimientos/pages/movimientos.page';
+import { TransferenciasPage } from './features/transferencias/pages/transferencias.page';
+import { PagosQrPage } from './features/pagos-qr/pages/pagos-qr.page';
 import { UsuariosPage } from './features/usuarios/pages/usuarios.page';
 import { authGuard } from './core/guards/auth.guard';
 
@@ -38,6 +40,14 @@ export const routes: Routes = [
       {
         path: 'movimientos',
         component: MovimientosPage
+      },
+      {
+        path: 'transferencias',
+        component: TransferenciasPage
+      },
+      {
+        path: 'pagos-qr',
+        component: PagosQrPage
       },
       {
         path: 'usuarios',

@@ -38,6 +38,14 @@ import { AuthService } from '../../../core/auth/auth.service';
             <span class="nav-icon">📋</span>
             <span class="nav-label" *ngIf="!sidebarCollapsed()">Movimientos</span>
           </a>
+          <a routerLink="/dashboard/transferencias" routerLinkActive="active" class="nav-item">
+            <span class="nav-icon">$</span>
+            <span class="nav-label" *ngIf="!sidebarCollapsed()">Transferencias</span>
+          </a>
+          <a routerLink="/dashboard/pagos-qr" routerLinkActive="active" class="nav-item">
+            <span class="nav-icon">QR</span>
+            <span class="nav-label" *ngIf="!sidebarCollapsed()">Pagos QR</span>
+          </a>
           <a routerLink="/dashboard/usuarios" routerLinkActive="active" class="nav-item">
             <span class="nav-icon">👥</span>
             <span class="nav-label" *ngIf="!sidebarCollapsed()">Usuarios</span>
@@ -157,9 +165,10 @@ import { AuthService } from '../../../core/auth/auth.service';
       border-left: 3px solid var(--primary-500);
     }
     .nav-icon {
-      font-size: 1.15rem;
+      font-size: 0.95rem;
       min-width: 1.5rem;
       text-align: center;
+      font-weight: 700;
     }
 
     .sidebar-footer {

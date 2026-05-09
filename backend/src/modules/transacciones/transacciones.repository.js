@@ -40,6 +40,26 @@ const findCuentaById = async (cuentaId) => {
 };
 
 /**
+ * RF25 - Buscar cuenta por numero enmascarado
+ */
+const findCuentaByNumeroCuenta = async (numeroCuenta) => {
+  const pool = await getConnection();
+  const result = await pool
+    .request()
+    .input('numeroCuenta', sql.VarChar(20), numeroCuenta)
+    .query(`
+      SELECT TOP 1 c.id AS cuenta_id, c.usuario_id, c.estado AS cuenta_estado,
+             c.saldo_centavos, c.limite_diario_centavos,
+             u.nombres, u.apellidos, u.telefono, u.estado AS usuario_estado
+      FROM cuentas c
+      INNER JOIN usuarios u ON u.id = c.usuario_id
+      WHERE c.numero_cuenta_enmascarado = @numeroCuenta
+      ORDER BY c.created_at ASC
+    `);
+  return result.recordset[0] || null;
+};
+
+/**
  * RF23 – Sumatoria de transacciones del día para una cuenta
  */
 const getSumaTxHoy = async (cuentaId) => {
@@ -93,7 +113,7 @@ const ejecutarTransferencia = async ({
     }
 
     // Crédito destino
-    await new sql.Request(tx)
+    const credit = await new sql.Request(tx)
       .input('id', sql.UniqueIdentifier, cuentaDestinoId)
       .input('monto', sql.BigInt, montoCentavos)
       .query(`
@@ -102,6 +122,10 @@ const ejecutarTransferencia = async ({
             updated_at = SYSUTCDATETIME()
         WHERE id = @id AND estado = 'ACTIVA'
       `);
+    if (credit.rowsAffected[0] === 0) {
+      await tx.rollback();
+      return { error: 'DESTINO_INVALIDO' };
+    }
 
     // Insertar transacción como COMPLETADA
     const txInsert = await new sql.Request(tx)
@@ -264,6 +288,7 @@ const revertirTransaccion = async (transaccionId) => {
 module.exports = {
   findCuentaByTelefono,
   findCuentaById,
+  findCuentaByNumeroCuenta,
   getSumaTxHoy,
   ejecutarTransferencia,
   findTransaccionById,
