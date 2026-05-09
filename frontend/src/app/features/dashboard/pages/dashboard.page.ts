@@ -46,6 +46,22 @@ import { AuthService } from '../../../core/auth/auth.service';
             <span class="nav-icon">QR</span>
             <span class="nav-label" *ngIf="!sidebarCollapsed()">Pagos QR</span>
           </a>
+          <a routerLink="/dashboard/analitica" routerLinkActive="active" class="nav-item">
+            <span class="nav-icon">A</span>
+            <span class="nav-label" *ngIf="!sidebarCollapsed()">Analitica</span>
+          </a>
+          <a routerLink="/dashboard/comercios" routerLinkActive="active" class="nav-item">
+            <span class="nav-icon">C</span>
+            <span class="nav-label" *ngIf="!sidebarCollapsed()">Comercios</span>
+          </a>
+          <a routerLink="/dashboard/dispositivos" routerLinkActive="active" class="nav-item">
+            <span class="nav-icon">D</span>
+            <span class="nav-label" *ngIf="!sidebarCollapsed()">Dispositivos</span>
+          </a>
+          <a routerLink="/dashboard/bancos" routerLinkActive="active" class="nav-item">
+            <span class="nav-icon">B</span>
+            <span class="nav-label" *ngIf="!sidebarCollapsed()">Bancos</span>
+          </a>
           <a routerLink="/dashboard/usuarios" routerLinkActive="active" class="nav-item">
             <span class="nav-icon">👥</span>
             <span class="nav-label" *ngIf="!sidebarCollapsed()">Usuarios</span>

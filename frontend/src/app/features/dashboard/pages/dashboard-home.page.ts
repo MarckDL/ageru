@@ -72,6 +72,22 @@ import { environment } from '../../../../environments/environment';
             <span class="action-icon">QR</span>
             <span class="action-label">Pagos QR</span>
           </a>
+          <a routerLink="/dashboard/analitica" class="action-card">
+            <span class="action-icon">A</span>
+            <span class="action-label">Analitica</span>
+          </a>
+          <a routerLink="/dashboard/comercios" class="action-card">
+            <span class="action-icon">C</span>
+            <span class="action-label">Comercios</span>
+          </a>
+          <a routerLink="/dashboard/dispositivos" class="action-card">
+            <span class="action-icon">D</span>
+            <span class="action-label">Dispositivos</span>
+          </a>
+          <a routerLink="/dashboard/bancos" class="action-card">
+            <span class="action-icon">B</span>
+            <span class="action-label">Bancos</span>
+          </a>
           <a routerLink="/dashboard/usuarios" class="action-card">
             <span class="action-icon">👥</span>
             <span class="action-label">Usuarios</span>

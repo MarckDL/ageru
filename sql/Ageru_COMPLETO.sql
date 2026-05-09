@@ -232,21 +232,49 @@ IF OBJECT_ID('comercios', 'U') IS NULL
 BEGIN
   CREATE TABLE comercios (
     id                UNIQUEIDENTIFIER NOT NULL DEFAULT NEWID(),
+    usuario_id        UNIQUEIDENTIFIER NULL,
+    cuenta_abono_id   UNIQUEIDENTIFIER NULL,
     ruc               CHAR(11)         NOT NULL,
     razon_social      VARCHAR(200)     NOT NULL,
     nombre_comercial  VARCHAR(150)     NULL,
     categoria         VARCHAR(60)      NOT NULL,
+    direccion_fiscal  VARCHAR(255)     NULL,
+    telefono_contacto VARCHAR(15)      NULL,
     estado            VARCHAR(20)      NOT NULL DEFAULT 'ACTIVO',
     created_at        DATETIME2        NOT NULL DEFAULT SYSUTCDATETIME(),
 
     CONSTRAINT pk_comercios PRIMARY KEY (id),
+    CONSTRAINT fk_comercios_usuarios FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+    CONSTRAINT fk_comercios_cuenta_abono FOREIGN KEY (cuenta_abono_id) REFERENCES cuentas(id),
     CONSTRAINT uq_comercios_ruc UNIQUE (ruc),
     CONSTRAINT chk_comercios_estado CHECK (estado IN ('ACTIVO', 'SUSPENDIDO', 'BAJA'))
   );
 
   CREATE INDEX idx_comercios_ruc ON comercios (ruc);
   CREATE INDEX idx_comercios_categoria ON comercios (categoria);
+  CREATE INDEX idx_comercios_usuario_id ON comercios (usuario_id);
 END
+GO
+
+-- Migracion defensiva si comercios ya existia con el esquema anterior.
+IF COL_LENGTH('comercios', 'usuario_id') IS NULL
+  ALTER TABLE comercios ADD usuario_id UNIQUEIDENTIFIER NULL;
+GO
+
+IF COL_LENGTH('comercios', 'cuenta_abono_id') IS NULL
+  ALTER TABLE comercios ADD cuenta_abono_id UNIQUEIDENTIFIER NULL;
+GO
+
+IF COL_LENGTH('comercios', 'direccion_fiscal') IS NULL
+  ALTER TABLE comercios ADD direccion_fiscal VARCHAR(255) NULL;
+GO
+
+IF COL_LENGTH('comercios', 'telefono_contacto') IS NULL
+  ALTER TABLE comercios ADD telefono_contacto VARCHAR(15) NULL;
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'idx_comercios_usuario_id')
+  CREATE INDEX idx_comercios_usuario_id ON comercios (usuario_id);
 GO
 
 -- =============================================================

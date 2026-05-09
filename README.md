@@ -1,4 +1,4 @@
-# Ageru - Sistema de Pagos (Sprint 2)
+# Ageru - Sistema de Pagos (Sprint 3)
 
 Sistema de gestion y visualizacion de datos, inspirado en plataformas de pago como Yape.
 
@@ -87,7 +87,13 @@ Ejemplo actual de rutas:
 - `/` -> landing
 - `/login` -> login
 - `/dashboard` -> dashboard
-- `/usuarios` -> usuarios
+- `/dashboard/transferencias` -> transferencias
+- `/dashboard/pagos-qr` -> QR abierto/fijo y pagos QR
+- `/dashboard/analitica` -> graficos Highcharts
+- `/dashboard/comercios` -> registro y reportes de comercio
+- `/dashboard/dispositivos` -> dispositivos del usuario
+- `/dashboard/bancos` -> catalogo y reporte por banco
+- `/dashboard/usuarios` -> usuarios
 
 ### Ejemplo: crear una nueva pagina
 
@@ -193,6 +199,45 @@ Cambios de base de datos para QR:
 - `pagos_qr.monto_centavos` permite `NULL` para QR abierto.
 - `uq_pagos_qr_abierto_cuenta` asegura un solo QR abierto activo por cuenta.
 
+## Sprint 3: analitica, comercios y cierre
+
+El Sprint 3 completa el sistema integrado:
+
+- Dashboard de analitica con Highcharts consumiendo datos de transacciones del backend.
+- Resumen de ingresos, salidas, transacciones por tipo y contrapartes frecuentes.
+- Registro de comercios con validacion de RUC unico de 11 digitos.
+- Comercios vinculados al usuario y a una cuenta de abono.
+- Reporte de ventas por comercio.
+- Registro, listado y desactivacion de dispositivos.
+- Catalogo de bancos, registro/actualizacion de entidades y reporte de cuentas por banco.
+- Script SQL consolidado `sql/Ageru_COMPLETO.sql` con estructura, seed y cambios de Sprint 2/Sprint 3.
+
+Endpoints agregados:
+- `GET /api/analitica/resumen`
+- `GET /api/comercios`
+- `POST /api/comercios`
+- `PUT /api/comercios/:id`
+- `GET /api/comercios/reportes/ventas`
+- `GET /api/dispositivos`
+- `POST /api/dispositivos`
+- `PATCH /api/dispositivos/:id/desactivar`
+- `GET /api/bancos`
+- `POST /api/bancos`
+- `PUT /api/bancos/:id`
+- `GET /api/bancos/reportes/cuentas`
+
+Pantallas agregadas:
+- `/dashboard/analitica`
+- `/dashboard/comercios`
+- `/dashboard/dispositivos`
+- `/dashboard/bancos`
+
+Cambios de base de datos para Sprint 3:
+- `comercios.usuario_id` vincula un comercio con su propietario.
+- `comercios.cuenta_abono_id` define la cuenta donde se acreditan cobros.
+- `comercios.direccion_fiscal` y `comercios.telefono_contacto` guardan datos operativos del local.
+- `idx_comercios_usuario_id` acelera las consultas de comercios por usuario.
+
 ## Configuracion inicial
 
 ### 1. Instalar dependencias
@@ -207,12 +252,9 @@ pnpm install
 
 ### 2. Configurar base de datos
 
-1. Abre `sql/Ageru_SCRIPT.sql` en SQL Server.
-2. Ejecuta el script para crear `Ageru_Chan`.
-3. Ejecuta `sql/Ageru_SEED_TEST.sql` para cargar datos de prueba (usuarios, cuentas, auth, etc.).
-4. Crea `backend/.env`:
-
-Tambien puedes ejecutar directamente `sql/Ageru_COMPLETO.sql`, que consolida estructura, autenticacion, seed y los cambios de Sprint 2 en un solo archivo.
+1. Abre `sql/Ageru_COMPLETO.sql` en SQL Server.
+2. Ejecuta el script para crear `Ageru_Chan`, tablas, autenticacion, seed y cambios de Sprint 2/Sprint 3.
+3. Crea `backend/.env`:
 
 ```bash
 DB_USER=tu_usuario
