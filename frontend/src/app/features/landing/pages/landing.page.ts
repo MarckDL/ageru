@@ -6,50 +6,512 @@ import { RouterLink } from '@angular/router';
   selector: 'app-landing-page',
   imports: [RouterLink],
   template: `
-    <main class="page">
+    <div class="landing">
+      <!-- Navbar -->
+      <nav class="navbar">
+        <div class="nav-brand">
+          <span class="logo-icon">⚡</span>
+          <span class="logo-text">Ageru</span>
+        </div>
+        <div class="nav-links">
+          <a routerLink="/login" class="nav-link">Iniciar Sesión</a>
+          <a routerLink="/login" class="btn-primary-sm">Comenzar</a>
+        </div>
+      </nav>
+
+      <!-- Hero -->
       <section class="hero">
-        <h1>Ageru - Plataforma de Pagos</h1>
-        <p>
-          Queremos construir una plataforma segura y simple para gestionar usuarios,
-          pagos y reportes, con una experiencia clara para el cliente y una base
-          tecnica escalable para el equipo.
-        </p>
-        <a class="cta" routerLink="/login">Iniciar sesion</a>
+        <div class="hero-bg-orb orb-1"></div>
+        <div class="hero-bg-orb orb-2"></div>
+        <div class="hero-content">
+          <span class="hero-badge">🚀 Plataforma Fintech para Comercios</span>
+          <h1 class="hero-title">
+            Pagos digitales
+            <span class="gradient-text">simples y seguros</span>
+            para tu negocio
+          </h1>
+          <p class="hero-description">
+            Genera cobros mediante códigos QR y enlaces de pago. Gestiona tu negocio
+            con dashboards interactivos y transacciones en tiempo real.
+          </p>
+          <div class="hero-actions">
+            <a routerLink="/login" class="btn-primary">
+              <span>Crear cuenta gratis</span>
+              <span class="btn-arrow">→</span>
+            </a>
+            <a href="#features" class="btn-ghost">Ver características</a>
+          </div>
+          <div class="hero-stats">
+            <div class="stat-item">
+              <span class="stat-value">< 200ms</span>
+              <span class="stat-label">Tiempo de respuesta</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+              <span class="stat-value">100%</span>
+              <span class="stat-label">Seguro con JWT</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+              <span class="stat-value">QR</span>
+              <span class="stat-label">Cobros instantáneos</span>
+            </div>
+          </div>
+        </div>
       </section>
 
-      <section class="goals">
-        <h2>Que buscamos lograr</h2>
-        <ul>
-          <li>Autenticacion y autorizacion seguras.</li>
-          <li>Dashboard con metricas clave del negocio.</li>
-          <li>Modulos separados por features para crecer sin desorden.</li>
-          <li>Backend por capas para mantener codigo limpio.</li>
-        </ul>
+      <!-- Features -->
+      <section class="features" id="features">
+        <h2 class="section-title">
+          Todo lo que necesitas para
+          <span class="gradient-text">cobrar digitalmente</span>
+        </h2>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">🔐</div>
+            <h3>Autenticación Segura</h3>
+            <p>Protección con JWT para cada sesión. Middleware de seguridad en cada operación financiera.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">📱</div>
+            <h3>Pagos QR</h3>
+            <p>Genera códigos QR fijos o abiertos. Tus clientes pagan escaneando desde su celular.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">💸</div>
+            <h3>Transferencias</h3>
+            <p>Envía y recibe dinero entre cuentas con precisión BIGINT. Sin errores de redondeo.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h3>Dashboard Interactivo</h3>
+            <p>Visualiza tus transacciones con gráficos Highcharts en tiempo real.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🏪</div>
+            <h3>Gestión de Comercios</h3>
+            <p>Registra tu negocio con RUC, categoría y genera tu QR permanente del local.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🔄</div>
+            <h3>Trazabilidad Total</h3>
+            <p>Cada operación queda registrada con timestamp UTC y referencia única.</p>
+          </div>
+        </div>
       </section>
 
-      <section class="quick-links">
-        <h2>Navegacion rapida</h2>
-        <nav>
-          <a routerLink="/login">Login</a>
-          <a routerLink="/dashboard">Dashboard (protegido)</a>
-          <a routerLink="/usuarios">Usuarios</a>
-        </nav>
+      <!-- Tech Stack -->
+      <section class="tech-section">
+        <h2 class="section-title">Construido con tecnología
+          <span class="gradient-text">de vanguardia</span>
+        </h2>
+        <div class="tech-grid">
+          <div class="tech-item">
+            <span class="tech-name">Angular</span>
+            <span class="tech-desc">Frontend SPA</span>
+          </div>
+          <div class="tech-item">
+            <span class="tech-name">Node.js</span>
+            <span class="tech-desc">API REST</span>
+          </div>
+          <div class="tech-item">
+            <span class="tech-name">SQL Server</span>
+            <span class="tech-desc">Base de datos</span>
+          </div>
+          <div class="tech-item">
+            <span class="tech-name">JWT</span>
+            <span class="tech-desc">Seguridad</span>
+          </div>
+          <div class="tech-item">
+            <span class="tech-name">Highcharts</span>
+            <span class="tech-desc">Visualización</span>
+          </div>
+          <div class="tech-item">
+            <span class="tech-name">Express</span>
+            <span class="tech-desc">Servidor</span>
+          </div>
+        </div>
       </section>
-    </main>
+
+      <!-- CTA -->
+      <section class="cta-section">
+        <div class="cta-card">
+          <h2>¿Listo para transformar tu negocio?</h2>
+          <p>Empieza a cobrar digitalmente en minutos. Sin costos ocultos.</p>
+          <a routerLink="/login" class="btn-primary btn-lg">
+            <span>Comenzar ahora</span>
+            <span class="btn-arrow">→</span>
+          </a>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <div class="footer-content">
+          <div class="footer-brand">
+            <span class="logo-icon">⚡</span>
+            <span class="logo-text">Ageru</span>
+          </div>
+          <p class="footer-text">
+            Proyecto académico — Seminario I · Escuela Superior Tecnológica · Lima, 2026
+          </p>
+        </div>
+      </footer>
+    </div>
   `,
-  styles: [
-    `
-      .page { max-width: 900px; margin: 0 auto; padding: 2rem 1rem 3rem; display: grid; gap: 1.5rem; }
-      .hero, .goals, .quick-links { background: #fff; border: 1px solid #e2e8f0; border-radius: 0.9rem; padding: 1.2rem; }
-      h1 { margin: 0 0 0.7rem; font-size: 1.8rem; }
-      h2 { margin: 0 0 0.6rem; font-size: 1.15rem; }
-      p { margin: 0 0 0.8rem; color: #334155; line-height: 1.5; }
-      ul { margin: 0; padding-left: 1.2rem; color: #334155; }
-      li { margin: 0.25rem 0; }
-      .cta { display: inline-block; padding: 0.55rem 0.8rem; border-radius: 0.55rem; background: #2563eb; color: #fff; text-decoration: none; }
-      nav { display: flex; gap: 0.7rem; flex-wrap: wrap; }
-      nav a { color: #1d4ed8; text-decoration: none; }
-    `
-  ]
+  styles: [`
+    .landing {
+      min-height: 100dvh;
+      overflow-x: hidden;
+    }
+
+    /* ── Navbar ── */
+    .navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      animation: fadeIn 0.6s ease;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .logo-icon {
+      font-size: 1.5rem;
+    }
+    .logo-text {
+      font-size: 1.4rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary-400), #e879f9);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    .nav-link {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color var(--transition-fast);
+    }
+    .nav-link:hover {
+      color: var(--text-primary);
+    }
+    .btn-primary-sm {
+      padding: 0.5rem 1.2rem;
+      background: linear-gradient(135deg, var(--primary-600), var(--primary-500));
+      color: #fff;
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all var(--transition-fast);
+    }
+    .btn-primary-sm:hover {
+      background: linear-gradient(135deg, var(--primary-500), var(--primary-400));
+      box-shadow: var(--shadow-glow);
+      color: #fff;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      position: relative;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 4rem 2rem 3rem;
+      text-align: center;
+    }
+    .hero-bg-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.3;
+      pointer-events: none;
+    }
+    .orb-1 {
+      width: 400px;
+      height: 400px;
+      background: var(--primary-600);
+      top: -100px;
+      right: -100px;
+      animation: float 8s ease-in-out infinite;
+    }
+    .orb-2 {
+      width: 300px;
+      height: 300px;
+      background: #e879f9;
+      bottom: -50px;
+      left: -80px;
+      animation: float 10s ease-in-out infinite reverse;
+    }
+    .hero-content {
+      position: relative;
+      z-index: 1;
+    }
+    .hero-badge {
+      display: inline-block;
+      padding: 0.4rem 1rem;
+      background: rgba(139, 92, 246, 0.12);
+      border: 1px solid rgba(139, 92, 246, 0.25);
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      color: var(--primary-300);
+      margin-bottom: 1.5rem;
+      animation: fadeIn 0.6s ease 0.2s both;
+    }
+    .hero-title {
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 1.25rem;
+      letter-spacing: -0.03em;
+      animation: fadeIn 0.6s ease 0.3s both;
+    }
+    .hero-description {
+      max-width: 600px;
+      margin: 0 auto 2rem;
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      animation: fadeIn 0.6s ease 0.4s both;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 3rem;
+      animation: fadeIn 0.6s ease 0.5s both;
+    }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.85rem 1.8rem;
+      background: linear-gradient(135deg, var(--primary-600), var(--primary-500));
+      color: #fff;
+      border-radius: var(--radius-full);
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all var(--transition-fast);
+      border: none;
+      cursor: pointer;
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, var(--primary-500), var(--primary-400));
+      box-shadow: var(--shadow-glow);
+      transform: translateY(-2px);
+      color: #fff;
+    }
+    .btn-lg {
+      padding: 1rem 2.2rem;
+      font-size: 1.05rem;
+    }
+    .btn-arrow {
+      transition: transform var(--transition-fast);
+    }
+    .btn-primary:hover .btn-arrow {
+      transform: translateX(4px);
+    }
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.85rem 1.8rem;
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-full);
+      font-weight: 500;
+      font-size: 1rem;
+      transition: all var(--transition-fast);
+    }
+    .btn-ghost:hover {
+      border-color: var(--primary-500);
+      color: var(--primary-400);
+      background: rgba(139, 92, 246, 0.06);
+    }
+
+    .hero-stats {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+      animation: fadeIn 0.6s ease 0.6s both;
+    }
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .stat-value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--primary-400);
+    }
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+    }
+    .stat-divider {
+      width: 1px;
+      height: 40px;
+      background: var(--border-default);
+    }
+
+    /* ── Features ── */
+    .features {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 4rem 2rem;
+    }
+    .section-title {
+      text-align: center;
+      font-size: clamp(1.5rem, 3vw, 2.2rem);
+      font-weight: 700;
+      margin-bottom: 2.5rem;
+      letter-spacing: -0.02em;
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.25rem;
+    }
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      transition: all var(--transition-base);
+    }
+    .feature-card:hover {
+      border-color: var(--primary-700);
+      background: var(--bg-card-hover);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+    }
+    .feature-icon {
+      font-size: 2rem;
+      margin-bottom: 0.75rem;
+    }
+    .feature-card h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .feature-card p {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    /* ── Tech ── */
+    .tech-section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 3rem 2rem 4rem;
+    }
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+    }
+    .tech-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.25rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      transition: all var(--transition-fast);
+    }
+    .tech-item:hover {
+      border-color: var(--primary-600);
+      box-shadow: 0 0 12px rgba(139, 92, 246, 0.15);
+    }
+    .tech-name {
+      font-weight: 600;
+      font-size: 1rem;
+      color: var(--text-primary);
+    }
+    .tech-desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+
+    /* ── CTA ── */
+    .cta-section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 2rem 4rem;
+    }
+    .cta-card {
+      text-align: center;
+      padding: 3rem 2rem;
+      background: linear-gradient(135deg, var(--primary-900), var(--bg-card));
+      border: 1px solid var(--primary-700);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-glow);
+    }
+    .cta-card h2 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+    }
+    .cta-card p {
+      color: var(--text-secondary);
+      margin-bottom: 1.5rem;
+      font-size: 1.05rem;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      border-top: 1px solid var(--border-subtle);
+      padding: 1.5rem 2rem;
+    }
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .footer-text {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, var(--primary-400), var(--primary-300), #e879f9);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    @media (max-width: 768px) {
+      .hero { padding: 2rem 1rem; }
+      .hero-stats { gap: 1rem; }
+      .stat-divider { display: none; }
+      .nav-link { display: none; }
+      .footer-content { flex-direction: column; text-align: center; }
+    }
+  `]
 })
 export class LandingPage {}

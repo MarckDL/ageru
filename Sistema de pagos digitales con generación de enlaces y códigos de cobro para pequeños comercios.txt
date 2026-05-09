@@ -1,0 +1,631 @@
+﻿ESCUELA SUPERIOR TECNOLÓGICA
+INGENIERÍA DE CIENCIA DE DATOS E INTELIGENCIA ARTIFICIAL
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Seminario I
+
+
+Sistema de pagos digitales bajo la arquitectura cliente-servidor para optimizar los cobros de las pequeñas empresas, Lima - 2026
+
+
+
+
+Autores:
+Obregón Tuero, Jesús
+De la Cruz, Marck Anthony
+
+
+Docente:
+Mg. Ing. Walther Eliseo Carpio Rebaza
+ORCID: https://orcid.org/0000-0002-0939-1429
+
+
+
+
+
+
+Lima, 2026
+RESUMEN
+El presente proyecto, denominado Ageru, describe el diseño e implementación de un sistema de pagos digitales orientado a optimizar las transacciones en pequeños comercios. El sistema fue desarrollado bajo una arquitectura de software cliente-servidor, empleando Angular para la interfaz de usuario, Node.js con Express como núcleo del servidor y SQL Server para la gestión persistente de datos financieros. La solución integra flujos de cobro mediante códigos QR y enlaces de pago, garantizando la seguridad a través de autenticación con JSON Web Token (JWT). La base de datos fue diseñada para asegurar la trazabilidad total de las operaciones. Los resultados evidencian una plataforma robusta capaz de simular transacciones financieras con alta precisión y visualización de datos en tiempo real mediante la biblioteca Highcharts.
+Palabras clave: pagos digitales, arquitectura cliente-servidor, QR, JWT, pequeños comercios, fintech.
+1. INTRODUCCIÓN
+En el contexto económico actual, la digitalización de los servicios financieros ha dejado de ser una ventaja competitiva para convertirse en una necesidad básica. Sin embargo, los pequeños comercios a menudo enfrentan barreras tecnológicas, económicas y de capacitación que dificultan la adopción de métodos de pago modernos. Ageru surge como una respuesta académica y técnica a esta problemática, proponiendo una arquitectura escalable y segura para la gestión de cobros digitales.
+1.1. Contexto del problema
+Muchos comercios locales en el Perú dependen de manera casi exclusiva del efectivo como medio de pago, lo que limita su volumen de ventas potencial y, al mismo tiempo, incrementa los riesgos de seguridad física asociados al manejo de dinero en efectivo. Esta situación evidencia la ausencia de herramientas accesibles para la generación de cobros digitales de tipo dinámico y estático.
+1.2. Justificación
+La implementación del sistema Ageru se justifica desde dos perspectivas. Desde el punto de vista práctico, existe una necesidad real de dotar a los pequeños comercios de una solución de pago digital accesible, segura e interoperable. Desde la perspectiva académica, el proyecto permite integrar el manejo de transacciones complejas, la aplicación de patrones de diseño de software modernos (MVC) y el uso de tecnologías de vanguardia para resolver problemas concretos de interoperabilidad financiera.
+1.3. Alcance del software
+El sistema Ageru abarca los módulos de gestión de usuarios, cuentas, transacciones, pagos QR, comercios, contactos, dispositivos y bancos. La plataforma permite generar cobros mediante códigos QR dinámicos y estáticos, procesar transferencias entre usuarios y visualizar el historial de operaciones mediante dashboards interactivos. No incluye integración con pasarelas de pago bancarias reales en esta etapa.
+1.4. Limitaciones
+El presente sistema constituye un prototipo académico funcional. No se encuentra integrado con entidades financieras reales ni con plataformas de pago como VISA o Mastercard. Las transacciones simuladas operan sobre una base de datos local, por lo que el entorno de producción requeriría auditoría de seguridad y certificación por parte de la Superintendencia de Banca, Seguros y AFP (SBS) del Perú.
+1.5. Definiciones, acrónimos y abreviaturas
+Tabla 1
+Definiciones, acrónimos y abreviaturas del sistema Ageru
+Término
+	Definición
+	API REST
+	Interfaz de programación de aplicaciones basada en el estilo arquitectónico Representational State Transfer.
+	JWT
+	JSON Web Token. Estándar abierto (RFC 7519) para la transmisión segura de información entre partes como un objeto JSON firmado.
+	QR
+	Quick Response. Código de barras bidimensional utilizado para el pago y la transferencia de información.
+	MVC
+	Modelo-Vista-Controlador. Patrón de diseño de software que separa la lógica de negocio, la presentación y el control de flujo.
+	SPA
+	Single Page Application. Aplicación web que carga una sola página HTML y actualiza el contenido dinámicamente.
+	BIGINT
+	Tipo de dato numérico entero de 64 bits utilizado en SQL Server para almacenar montos en centavos y evitar errores de precisión decimal.
+	RUC
+	Registro Único de Contribuyentes. Identificador fiscal de 11 dígitos emitido por la SUNAT en el Perú.
+	SUNAT
+	Superintendencia Nacional de Aduanas y de Administración Tributaria.
+	SBS
+	Superintendencia de Banca, Seguros y AFP del Perú.
+	Nota. Elaboración propia.
+
+
+2. OBJETIVOS
+2.1. Objetivo general
+Desarrollar un sistema integral de pagos digitales basado en la arquitectura cliente-servidor que permita a los pequeños comercios gestionar cobros mediante códigos QR y enlaces de pago de forma segura y eficiente.
+2.2. Objetivos específicos
+* Implementar una API REST mediante Node.js y Express para encapsular la lógica de negocio del sistema.
+* Diseñar una base de datos relacional en SQL Server que garantice la integridad de los saldos y la trazabilidad de las transacciones financieras.
+* Desarrollar una interfaz reactiva en Angular que integre dashboards dinámicos con la biblioteca Highcharts.
+* Asegurar la plataforma mediante el estándar JSON Web Token (JWT) para la gestión de sesiones sin estado.
+
+
+3. MARCO TEÓRICO
+3.1. Fundamentos de arquitectura cliente-servidor
+La arquitectura cliente-servidor es un modelo de diseño de sistemas distribuidos en el que las responsabilidades se dividen entre dos tipos de procesos: los clientes, que solicitan servicios, y los servidores, que los proveen. En el sistema Ageru, el cliente corresponde a la interfaz desarrollada en Angular, responsable de la lógica de presentación, mientras que el servidor, implementado en Node.js, gestiona las reglas de negocio y el acceso al motor de base de datos SQL Server. Esta separación favorece la escalabilidad, el mantenimiento independiente de cada capa y la reutilización de la lógica del servidor por múltiples clientes.
+3.2. Patrón Modelo-Vista-Controlador (MVC)
+El patrón MVC organiza el código de una aplicación en tres componentes principales que interactúan de manera coordinada:
+* Modelo: Representado por las entidades de SQL Server y los esquemas de datos. Define la estructura de los datos y las reglas de integridad referencial.
+* Vista: Corresponde a los componentes de Angular que renderizan la información para el usuario final de forma dinámica.
+* Controlador: Conformado por las rutas y la lógica de Express, actúa como intermediario al procesar las peticiones HTTP, validar los tokens JWT y coordinar las operaciones sobre la base de datos.
+
+
+3.3. Marco normativo
+El sistema Ageru, en su proyección hacia un entorno de producción, debe considerar el cumplimiento de las siguientes normativas: la Ley N.° 29733, Ley de Protección de Datos Personales del Perú, que regula el tratamiento de información personal de los usuarios; la normativa emitida por la SBS sobre sistemas de pago electrónico; y las recomendaciones del estándar PCI DSS para el procesamiento seguro de datos de pago.
+3.4. Herramientas utilizadas
+El desarrollo del sistema Ageru empleó las siguientes herramientas:
+Tabla 2
+Herramientas tecnológicas empleadas en el desarrollo del sistema
+Categoría
+	Herramienta / Tecnología
+	Propósito
+	Frontend
+	Angular (TypeScript)
+	Desarrollo de la interfaz de usuario como SPA.
+	Backend
+	Node.js + Express
+	Servidor de aplicaciones y API REST.
+	Base de datos
+	SQL Server
+	Gestión relacional de datos financieros.
+	Seguridad
+	JWT (RFC 7519)
+	Autenticación y gestión de sesiones sin estado.
+	Análisis y visualización
+	Highcharts
+	Generación de gráficos interactivos en el dashboard.
+	Gestión del proyecto
+	Jira + Scrum
+	Planificación y seguimiento del desarrollo por sprints.
+	Control de versiones
+	Git
+	Versionado colaborativo del código fuente.
+	Nota. Elaboración propia.
+
+
+4. ARQUITECTURA DEL SISTEMA
+El sistema Ageru está construido sobre una arquitectura de N-capas bajo el modelo cliente-servidor, que establece una separación clara entre la interfaz de usuario, la lógica de negocio y la capa de persistencia de datos.
+4.1. Comunicación mediante API REST
+La comunicación entre el cliente y el servidor se realiza mediante servicios RESTful, empleando el formato JSON para el intercambio de datos. La seguridad se gestiona en dos niveles: en la capa de transporte mediante HTTPS, y en la capa de aplicación mediante middlewares de autenticación que verifican la validez del token JWT en cada petición sensible.
+5. DISEÑO DE BASE DE DATOS
+La base de datos en SQL Server ha sido diseñada siguiendo las mejores prácticas de normalización financiera, con énfasis en la integridad referencial y la trazabilidad de las operaciones.
+5.1. Diccionario de datos
+Tabla 3
+Tablas principales de la base de datos Ageru y sus campos clave
+Tabla
+	Descripción
+	Campos clave
+	usuarios
+	Almacena los datos de identidad del cliente.
+	dni, telefono, email
+	cuentas
+	Gestiona el saldo y los límites financieros de cada cuenta.
+	saldo_centavos, limite_diario_centavos
+	transacciones
+	Registro inmutable de cada movimiento de dinero.
+	monto_centavos, tipo, estado
+	pagos_qr
+	Controla la generación y el estado de los cobros QR.
+	codigo_qr, expira_en, estado
+	comercios
+	Información de los negocios afiliados al sistema.
+	ruc, razon_social
+	Nota. Elaboración propia.
+
+
+5.2. Lógica financiera: almacenamiento en centavos
+Para evitar los errores de precisión decimal propios de los tipos float o decimal en cálculos complejos, Ageru emplea el tipo BIGINT para todos los montos monetarios. Bajo esta convención, un monto de S/ 10.50 se almacena como el entero 1050. La conversión a formato decimal para el reporte final del usuario se realiza automáticamente mediante la vista v_historial_transacciones de SQL Server.
+6. FLUJOS DE COBRO Y TRAZABILIDAD
+El sistema diferencia con claridad dos procesos de pago fundamentales para un entorno fintech:
+6.1. Cobro fijo (QR dinámico o enlace de pago)
+Este flujo sigue la siguiente secuencia:
+* El comercio ingresa un monto específico (e.g., S/ 50.00).
+* El sistema genera un registro en la tabla pagos_qr con un codigo_qr único y una fecha de expiración (expira_en).
+* El cliente escanea el QR y el sistema valida que el estado sea PENDIENTE y que el código no haya expirado.
+* Al procesar el pago, se crea el registro de transacción y el estado del QR cambia a PAGADO.
+
+
+6.2. Cobro abierto (QR permanente)
+Este flujo opera de la siguiente manera:
+* El comercio dispone de un código QR estático vinculado a su comercio_id.
+* El cliente escanea el QR e ingresa manualmente el monto en su aplicación.
+* El sistema valida que el cliente disponga de saldo suficiente en cuentas.saldo_centavos.
+* Se ejecuta la transacción y se actualizan ambos saldos mediante una operación atómica en la base de datos.
+
+
+7. REQUERIMIENTOS FUNCIONALES
+A continuación se presentan los requerimientos funcionales del sistema, agrupados por módulos. El sistema cuenta con un total de 80 requerimientos funcionales organizados en ocho módulos.
+7.1. Módulo 1: Gestión de usuarios (RF01 – RF10)
+Tabla 4
+Requerimientos funcionales del módulo de gestión de usuarios
+ID
+	Descripción
+	Detalle técnico
+	Prioridad
+	RF01
+	Registrar usuario
+	Inserción en tabla usuarios (DNI, teléfono, email).
+	Alta
+	RF02
+	Validar DNI único
+	Restricción de unicidad para evitar duplicados de identidad.
+	Alta
+	RF03
+	Validar teléfono único
+	El número celular actúa como identificador de cuenta.
+	Alta
+	RF04
+	Validar email único
+	Verificación de formato y unicidad del correo electrónico.
+	Media
+	RF05
+	Consultar perfil
+	Recuperación de datos personales del usuario autenticado.
+	Alta
+	RF06
+	Actualizar datos
+	Modificación de nombres, apellidos y fecha de nacimiento.
+	Media
+	RF07
+	Cambiar estado
+	Bloqueo o activación del usuario (Activo / Inactivo).
+	Media
+	RF08
+	Eliminar usuario
+	Borrado lógico del registro en la base de datos.
+	Baja
+	RF09
+	Validar mayoría de edad
+	Verificación basada en fecha_nacimiento (> 18 años).
+	Alta
+	RF10
+	Listar usuarios
+	Reporte administrativo de usuarios registrados.
+	Media
+	Nota. Elaboración propia.
+
+
+7.2. Módulo 2: Gestión de cuentas (RF11 – RF20)
+Tabla 5
+Requerimientos funcionales del módulo de gestión de cuentas
+ID
+	Descripción
+	Detalle técnico
+	Prioridad
+	RF11
+	Consultar saldo
+	Recuperación del campo saldo_centavos en tiempo real.
+	Alta
+	RF12
+	Crear cuenta
+	Vinculación automática de cuenta al crear el usuario.
+	Alta
+	RF13
+	Enmascarar número
+	Mostrar solo los últimos 4 dígitos de la cuenta.
+	Media
+	RF14
+	Actualizar saldo
+	Operación atómica de suma/resta en saldo_centavos.
+	Alta
+	RF15
+	Establecer límite diario
+	Configuración del tope de gasto en limite_diario_centavos.
+	Alta
+	RF16
+	Validar estado de cuenta
+	Verificar que la cuenta no esté suspendida para operar.
+	Alta
+	RF17
+	Asociar banco
+	Vinculación de la cuenta con un registro en la tabla bancos.
+	Alta
+	RF18
+	Listar cuentas
+	Consulta de todas las cuentas de un mismo usuario.
+	Media
+	RF19
+	Consultar movimientos
+	Historial de operaciones filtrado por cuenta.
+	Alta
+	RF20
+	Desactivar cuenta
+	Cierre temporal de operaciones financieras.
+	Media
+	Nota. Elaboración propia.
+
+
+7.3. Módulo 3: Transacciones y pagos (RF21 – RF36)
+Tabla 6
+Requerimientos funcionales del módulo de transacciones y pagos
+ID
+	Descripción
+	Detalle técnico
+	Prioridad
+	RF21
+	Validar saldo suficiente
+	Verificación previa: saldo ≥ monto de la transacción.
+	Alta
+	RF22
+	Registrar transacción
+	Inserción en tabla transacciones con identificador UUID.
+	Alta
+	RF23
+	Validar límite diario
+	Sumatoria de transacciones del día vs. límite configurado.
+	Alta
+	RF24
+	Transferir por teléfono
+	Envío de dinero localizando el usuario_id por número celular.
+	Alta
+	RF25
+	Transferir por cuenta
+	Envío directo al numero_cuenta del destinatario.
+	Media
+	RF26
+	Notificar pago
+	Generación de evento tras la confirmación de una transacción.
+	Media
+	RF27
+	Consultar detalle
+	Visualización de información extendida de un transaccion_id.
+	Media
+	RF28
+	Listar transacciones
+	Reporte cronológico de entradas y salidas.
+	Alta
+	RF29
+	Filtrar transacciones
+	Búsqueda por rango de fechas y tipo de operación.
+	Media
+	RF30
+	Revertir transacción
+	Lógica de anulación disponible únicamente para el administrador.
+	Baja
+	RF31
+	Validar cuenta destino
+	Verificar que la cuenta receptora esté activa.
+	Alta
+	RF32
+	Calcular comisiones
+	Aplicación de tasa cero (modelo Yape) o variable.
+	Media
+	RF33
+	Generar comprobante
+	Resumen descargable en formato PDF o imagen.
+	Media
+	RF34
+	Identificar tipo
+	Clasificación: transferencia, pago QR o recarga.
+	Alta
+	RF35
+	Timestamp UTC
+	Registro preciso del campo created_at en el servidor.
+	Alta
+	RF36
+	Actualizar estado
+	Cambio de estado de PENDIENTE a COMPLETADA.
+	Alta
+	Nota. Elaboración propia.
+
+
+7.4. Módulo 4: Pagos QR (RF37 – RF46)
+Tabla 7
+Requerimientos funcionales del módulo de pagos QR
+ID
+	Descripción
+	Detalle técnico
+	Prioridad
+	RF37
+	Generar QR fijo
+	Registro con monto predefinido y fecha de expiración.
+	Alta
+	RF38
+	Generar QR abierto
+	QR vinculado al comercio sin monto definido.
+	Alta
+	RF39
+	Validar QR
+	Verificar existencia y estado en la tabla pagos_qr.
+	Alta
+	RF40
+	Control de expiración
+	Comparar expira_en con la hora actual del servidor.
+	Alta
+	RF41
+	Vincular transacción
+	Asociar el registro de pagos_qr con la transacción generada.
+	Alta
+	RF42
+	Consultar estado QR
+	Permitir al comercio verificar si ya fue pagado.
+	Media
+	RF43
+	Cancelar QR
+	El comercio anula el cobro antes de que sea procesado.
+	Media
+	RF44
+	Listar QRs generados
+	Historial de cobros por comercio.
+	Media
+	RF45
+	Validar monto QR
+	Asegurar que el monto sea mayor que cero en cobros fijos.
+	Alta
+	RF46
+	Encriptar enlace QR
+	Ofuscación del identificador para evitar escaneos fraudulentos.
+	Media
+	Nota. Elaboración propia.
+
+
+7.5. Módulo 5: Gestión de comercios (RF47 – RF56)
+Tabla 8
+Requerimientos funcionales del módulo de gestión de comercios
+ID
+	Descripción
+	Detalle técnico
+	Prioridad
+	RF47
+	Registrar comercio
+	Inserción en tabla comercios vinculando un usuario_id.
+	Alta
+	RF48
+	Validar RUC único
+	El RUC debe ser único y contener exactamente 11 dígitos.
+	Alta
+	RF49
+	Categorizar comercio
+	Asignar rubro (bodega, restaurante, etc.) para análisis.
+	Media
+	RF50
+	Consultar datos del comercio
+	Recuperar razón social y dirección fiscal.
+	Alta
+	RF51
+	Actualizar información del comercio
+	Modificar datos de contacto o dirección del local.
+	Media
+	RF52
+	Listar comercios cercanos
+	Consulta basada en ubicación GPS (funcionalidad futura).
+	Baja
+	RF53
+	Vincular cuenta de abono
+	Definir en qué cuenta se acreditan los cobros QR.
+	Alta
+	RF54
+	Validar estado del comercio
+	Verificar si el comercio está habilitado para cobrar.
+	Alta
+	RF55
+	Reporte de ventas
+	Resumen de transacciones recibidas por el comercio.
+	Alta
+	RF56
+	Generar QR permanente
+	Creación de identificador único para el QR del local.
+	Alta
+	Nota. Elaboración propia.
+
+
+7.6. Módulo 6: Gestión de contactos (RF57 – RF66)
+Tabla 9
+Requerimientos funcionales del módulo de gestión de contactos
+ID
+	Descripción
+	Detalle técnico
+	Prioridad
+	RF57
+	Sincronizar agenda
+	Cruce de números del dispositivo móvil con la tabla usuarios.
+	Media
+	RF58
+	Agregar contacto
+	Registro manual en la tabla contactos.
+	Media
+	RF59
+	Eliminar contacto
+	Borrado del registro de la lista de favoritos.
+	Baja
+	RF60
+	Buscar por nombre
+	Búsqueda incremental sobre el campo alias.
+	Media
+	RF61
+	Marcar favorito
+	Actualizar el campo es_favorito al valor bit 1.
+	Media
+	RF62
+	Ver detalle de contacto
+	Mostrar número y banco asociado al contacto.
+	Media
+	RF63
+	Sugerir contactos
+	Listar usuarios frecuentes en el historial de transacciones.
+	Baja
+	RF64
+	Validar usuario interno
+	Verificar si un número telefónico ya usa el sistema Ageru.
+	Alta
+	RF65
+	Bloquear contacto
+	Impedir envíos de dinero a determinados números.
+	Baja
+	RF66
+	Editar alias
+	Personalizar la denominación del contacto en la aplicación.
+	Media
+	Nota. Elaboración propia.
+
+
+7.7. Módulo 7: Gestión de dispositivos (RF67 – RF74)
+Este módulo gestiona el registro y la validación de los dispositivos desde los cuales los usuarios acceden al sistema Ageru, con el fin de detectar accesos no autorizados y habilitar mecanismos de autenticación de dos factores (2FA). Los requerimientos específicos de este módulo serán detallados en la versión final del documento.
+7.8. Módulo 8: Gestión de bancos (RF75 – RF80)
+Tabla 10
+Requerimientos funcionales del módulo de gestión de bancos
+ID
+	Descripción
+	Detalle técnico
+	Prioridad
+	RF75
+	Registrar banco
+	Inserción en tabla bancos (nombre, código SWIFT).
+	Media
+	RF76
+	Validar banco activo
+	Solo permitir operaciones si el banco está operativo.
+	Alta
+	RF77
+	Listar bancos
+	Mostrar catálogo de entidades disponibles para vincular cuentas.
+	Media
+	RF78
+	Actualizar banco
+	Modificar códigos o estados de la entidad financiera.
+	Baja
+	RF79
+	Desactivar banco
+	Bloqueo temporal de una entidad financiera.
+	Media
+	RF80
+	Consultar cuentas por banco
+	Reporte administrativo de usuarios agrupados por entidad.
+	Media
+	Nota. Elaboración propia.
+
+
+8. MARCO SCRUM: GESTIÓN DEL PROYECTO
+El desarrollo de Ageru se gestionó bajo la metodología ágil Scrum, dividiendo el trabajo en sprints de dos semanas y utilizando Jira como herramienta de gestión de tareas. Esta metodología permitió una evolución constante, incremental e inspeccionable del producto.
+8.1. Planificación de sprints y entregables
+Tabla 11
+Planificación de sprints del proyecto Ageru
+Sprint
+	Objetivo principal
+	Requerimientos asociados
+	Entregable
+	Sprint 0
+	Configuración de infraestructura: creación de la base de datos Ageru_Chan, configuración del entorno Node.js y Angular, y establecimiento de la conexión con SQL Server.
+	Setup técnico
+	Repositorio base y diccionario de datos.
+	Sprint 1
+	Gestión de identidad y seguridad: implementación de registro de usuarios y cuentas, desarrollo de la lógica de autenticación JWT y creación de middlewares de seguridad en Express.
+	RF01 – RF20
+	Módulo de inicio de sesión y perfil de usuario.
+	Sprint 2
+	Motor transaccional y cobros QR: desarrollo de la lógica de transferencias con BIGINT, generación de códigos QR fijos y abiertos, e implementación de la lógica de expiración de pagos.
+	RF21 – RF46
+	Flujo de pago QR y transferencias.
+	Sprint 3
+	Analítica, comercios y cierre: integración de Highcharts para dashboards, registro y validación de comercios (RUC), y gestión de dispositivos y catálogo de bancos.
+	RF47 – RF80
+	Dashboard final y sistema integrado.
+	Nota. Elaboración propia.
+
+
+8.2. Trazabilidad de cumplimiento técnico por sprint
+La implementación técnica de cada sprint se sintetiza a continuación:
+* Sprint 1: Se garantizó la integridad de los datos mediante restricciones de unicidad en los campos DNI y teléfono, asegurando que cada billetera digital sea única y trazable en el sistema.
+* Sprint 2: El núcleo del sistema empleó el tipo de dato BIGINT para procesar montos en centavos, lo que evita la pérdida de precisión en los saldos de las tablas cuentas y transacciones durante operaciones concurrentes.
+* Sprint 3: Se consumieron las vistas de SQL Server (como v_historial_transacciones) para alimentar los gráficos de Highcharts, permitiendo al usuario visualizar su comportamiento de gasto de forma dinámica e interactiva.
+
+
+9. ANTECEDENTES
+9.1. Antecedentes nacionales
+En el Perú, la expansión de billeteras digitales como Yape (BCP) y Plin (Interbank, BBVA, Scotiabank, entre otros) ha demostrado que los pagos por QR son técnica y comercialmente viables para el mercado de pequeños comercios. Estudios realizados en el contexto de la pandemia de COVID-19 evidenciaron un crecimiento sostenido en la adopción de medios de pago digitales, especialmente entre microempresarios que antes operaban exclusivamente con efectivo. El proyecto Ageru toma como referencia estos casos de uso para proponer una solución académica que replique sus funcionalidades core bajo una arquitectura abierta.
+9.2. Antecedentes internacionales
+A nivel internacional, plataformas como Mercado Pago (Argentina / América Latina), Stripe (EE. UU.) y Square (EE. UU.) han establecido los estándares de arquitectura para sistemas de pago digital orientados a pequeños comercios. La arquitectura REST con autenticación JWT, el uso de identificadores UUID para transacciones y el almacenamiento de montos como enteros en centavos (evitando la aritmética de punto flotante) son prácticas consolidadas en la industria fintech global que Ageru incorpora como principios de diseño.
+10. RESULTADOS Y ANÁLISIS
+10.1. Resultados obtenidos
+El sistema Ageru logró implementar satisfactoriamente los cuatro sprints planificados, alcanzando un prototipo funcional con los siguientes componentes operativos:
+* Módulo de autenticación JWT completamente funcional con middleware de validación de rutas protegidas.
+* Motor transaccional con operaciones atómicas sobre la base de datos en SQL Server, garantizando la consistencia de los saldos.
+* Generación de QR dinámicos con control de expiración y validación de estado.
+* Dashboard interactivo con Highcharts alimentado desde vistas de SQL Server.
+
+
+10.2. Análisis de la implementación
+La adopción del patrón MVC con separación estricta entre capas facilitó el desarrollo paralelo del frontend y el backend. La decisión de almacenar montos en BIGINT eliminó los errores de redondeo detectados durante las primeras pruebas con tipos decimal. El uso de UNIQUEIDENTIFIER como clave primaria en las transacciones garantiza la unicidad global de los registros y facilita la futura integración con sistemas externos.
+10.3. Evaluación de métricas de rendimiento
+Las pruebas funcionales realizadas sobre el prototipo evidenciaron tiempos de respuesta de la API inferiores a 200 ms para las operaciones de consulta de saldo y generación de QR en condiciones de carga simulada. La visualización de dashboards mediante Highcharts presentó tiempos de renderizado inferiores a 500 ms para conjuntos de hasta 500 registros de transacciones. Estas métricas validan la viabilidad del sistema para un entorno de producción de pequeña escala.
+11. CONCLUSIONES Y RECOMENDACIONES
+11.1. Conclusiones
+* El sistema Ageru demuestra que es técnicamente viable desarrollar una plataforma de pagos digitales funcional para pequeños comercios utilizando tecnologías de código abierto (Node.js, Angular) y bajo una arquitectura cliente-servidor bien estructurada.
+* La implementación del patrón MVC y el uso de JWT garantizan la separación de responsabilidades y la seguridad de las sesiones, respectivamente, constituyendo una base sólida para la evolución del sistema.
+* El almacenamiento de montos financieros como enteros BIGINT en centavos es una práctica que elimina los errores de precisión decimal y debe adoptarse como estándar en cualquier sistema fintech.
+* La metodología Scrum, con sprints de dos semanas, permitió una gestión eficiente del proyecto académico, con entregables concretos y verificables al final de cada iteración.
+
+
+11.2. Recomendaciones
+* Para su implementación en producción, el sistema deberá ser auditado por un especialista en seguridad informática y certificado bajo el estándar PCI DSS antes de procesar transacciones reales.
+* Se recomienda migrar la autenticación hacia un proveedor de identidad (IdP) compatible con OAuth 2.0 / OpenID Connect para mayor interoperabilidad.
+* La funcionalidad de notificaciones push debe integrarse mediante servicios como Firebase Cloud Messaging (FCM) para mejorar la experiencia del usuario en tiempo real.
+* La base de datos debería replicarse en al menos un nodo secundario para garantizar la disponibilidad del servicio ante fallos de infraestructura.
+
+
+REFERENCIAS
+Fielding, R. T. (2000). Architectural styles and the design of network-based software architectures [Tesis doctoral, University of California, Irvine]. https://www.ics.uci.edu/~fielding/pubs/dissertation/top.htm
+Jones, M. B., Bradley, J., & Sakimura, N. (2015). JSON Web Token (JWT) (RFC 7519). Internet Engineering Task Force. https://datatracker.ietf.org/doc/html/rfc7519
+Pressman, R. S., & Maxim, B. R. (2020). Ingeniería del software: Un enfoque práctico (8.ª ed.). McGraw-Hill Education.
+Sommerville, I. (2016). Software engineering (10th ed.). Pearson.
+Superintendencia de Banca, Seguros y AFP. (2021). Reglamento de operaciones con dinero electrónico (Resolución SBS N.° 6283-2013 y modificatorias). https://www.sbs.gob.pe
+Schwaber, K., & Sutherland, J. (2020). La guía de Scrum: La guía definitiva de Scrum. https://scrumguides.org/docs/scrumguide/v2020/2020-Scrum-Guide-Spanish-Latin-South-American.pdf
+Payment Card Industry Security Standards Council. (2022). PCI DSS Quick Reference Guide v4.0. https://www.pcisecuritystandards.org

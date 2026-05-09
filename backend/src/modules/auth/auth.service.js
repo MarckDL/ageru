@@ -4,10 +4,25 @@ const authRepository = require('./auth.repository');
 const activeSessions = new Map();
 
 const sanitizeAuthUser = (record) => ({
+  usuarioId: record.usuario_id,
   username: record.username,
   name: `${record.nombres} ${record.apellidos}`,
   role: 'user'
 });
+
+/**
+ * RF09 – Validar mayoría de edad (> 18 años)
+ */
+const esMayorDeEdad = (fechaNacimiento) => {
+  const nacimiento = new Date(fechaNacimiento);
+  const hoy = new Date();
+  let edad = hoy.getFullYear() - nacimiento.getFullYear();
+  const mesDiff = hoy.getMonth() - nacimiento.getMonth();
+  if (mesDiff < 0 || (mesDiff === 0 && hoy.getDate() < nacimiento.getDate())) {
+    edad--;
+  }
+  return edad >= 18;
+};
 
 const login = async ({ username, password }) => {
   if (!username || !password) {
@@ -56,6 +71,11 @@ const register = async (payload) => {
 
   if (String(payload.password).trim().length < 6) {
     return { badRequest: true, message: 'La contrasena debe tener al menos 6 caracteres' };
+  }
+
+  // RF09 – Validar mayoría de edad
+  if (!esMayorDeEdad(payload.fechaNacimiento)) {
+    return { badRequest: true, message: 'Debes ser mayor de 18 anos para registrarte' };
   }
 
   const normalizedUsername = String(payload.username).trim().toLowerCase();
