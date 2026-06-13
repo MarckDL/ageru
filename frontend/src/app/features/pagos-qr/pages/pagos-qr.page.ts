@@ -59,17 +59,18 @@ import { environment } from '../../../../environments/environment';
             <label for="codigo">Codigo QR</label>
             <textarea id="codigo" [(ngModel)]="codigoQr" rows="4"></textarea>
           </div>
-          <div class="field" *ngIf="qrValidado()?.requiereMonto">
-            <label for="montoPago">Monto en soles</label>
-            <input id="montoPago" type="number" [(ngModel)]="montoPagoSoles" min="0.01" step="0.01" />
-          </div>
+
           <div class="actions">
-            <button class="btn-secondary" type="button" (click)="validarQr()" [disabled]="validating()">Validar</button>
-            <button class="btn-primary" type="button" (click)="pagarQr()" [disabled]="paying()">Pagar</button>
+            <button class="btn-secondary" type="button" (click)="validarQr()" [disabled]="validating() || !codigoQr.trim()">
+              {{ validating() ? 'Validando...' : 'Validar' }}
+            </button>
           </div>
           <p class="msg-error" *ngIf="payError()">{{ payError() }}</p>
 
           <div class="qr-detail" *ngIf="qrValidado()">
+            <div class="qr-preview" *ngIf="qrValidado()?.qrImageDataUrl">
+              <img [src]="qrValidado()?.qrImageDataUrl" alt="QR validado" />
+            </div>
             <span class="badge" [ngClass]="{
               'badge-warning': qrValidado()?.estado === 'PENDIENTE',
               'badge-success': qrValidado()?.estado === 'PAGADO',
@@ -78,6 +79,24 @@ import { environment } from '../../../../environments/environment';
             <strong>{{ qrValidado()?.nombre_comercial || qrValidado()?.razon_social }}</strong>
             <span>{{ qrValidado()?.tipo_qr }} - {{ qrValidado()?.montoSoles ? ('S/ ' + qrValidado()?.montoSoles) : 'Monto abierto' }}</span>
           </div>
+
+          <div class="field" *ngIf="qrValidado()?.requiereMonto">
+            <label for="montoPago">Monto en soles</label>
+            <input id="montoPago" type="number" [(ngModel)]="montoPagoSoles" min="0.01" step="0.01" />
+          </div>
+
+          <button
+            class="btn-primary btn-pay"
+            type="button"
+            (click)="pagarQr()"
+            *ngIf="qrValidado()"
+            [disabled]="paying() || qrValidado()?.estado !== 'PENDIENTE'"
+          >
+            {{ paying() ? 'Procesando pago...' : 'Pagar QR' }}
+          </button>
+          <p class="help-pay" *ngIf="qrValidado() && qrValidado()?.estado !== 'PENDIENTE'">
+            Este QR ya no acepta pagos (estado: {{ qrValidado()?.estado }}).
+          </p>
 
           <div class="qr-detail success" *ngIf="pagoResultado()">
             <strong>Pago completado</strong>
@@ -126,11 +145,15 @@ import { environment } from '../../../../environments/environment';
     .btn-primary { background: linear-gradient(135deg, var(--primary-600), var(--primary-500)); color: #fff; }
     .btn-secondary { background: var(--bg-elevated); color: var(--text-primary); border: 1px solid var(--border-default); }
     .btn-primary:disabled, .btn-secondary:disabled { opacity: 0.55; cursor: not-allowed; }
+    .btn-pay { width: 100%; margin-top: 0.5rem; }
+    .help-pay { margin-top: 0.5rem; font-size: 0.82rem; color: var(--text-muted); text-align: center; }
     .btn-link { border: 0; background: transparent; color: var(--error); cursor: pointer; font-weight: 700; }
     .qr-result { margin-top: 1rem; display: grid; place-items: center; gap: 0.75rem; }
     .qr-result img { width: 220px; border-radius: var(--radius-sm); background: #fff; padding: 0.5rem; }
     .qr-code { width: 100%; padding: 0.6rem; background: var(--bg-input); border-radius: var(--radius-sm); font-size: 0.75rem; color: var(--primary-300); overflow-wrap: anywhere; }
     .qr-detail { margin-top: 0.85rem; padding: 0.75rem; background: var(--bg-input); border-radius: var(--radius-sm); display: flex; flex-direction: column; gap: 0.25rem; }
+    .qr-preview { display: grid; place-items: center; margin-bottom: 0.5rem; }
+    .qr-preview img { width: 180px; border-radius: var(--radius-sm); background: #fff; padding: 0.4rem; }
     .qr-detail span { color: var(--text-secondary); font-size: 0.85rem; }
     .qr-detail.success { border: 1px solid rgba(34, 197, 94, 0.35); }
     .history { margin-top: 1rem; }
@@ -201,6 +224,7 @@ export class PagosQrPage implements OnInit {
   validarQr(): void {
     this.validating.set(true);
     this.payError.set('');
+    this.pagoResultado.set(null);
     this.http.post<any>(`${environment.apiBaseUrl}/pagos-qr/validar`, {
       codigoQr: this.codigoQr
     }, { headers: this.authService.getAuthHeaders() }).subscribe({
@@ -219,6 +243,10 @@ export class PagosQrPage implements OnInit {
   }
 
   pagarQr(): void {
+    if (!this.qrValidado() || this.qrValidado()?.estado !== 'PENDIENTE') {
+      this.payError.set('Primero valida un QR en estado PENDIENTE');
+      return;
+    }
     this.paying.set(true);
     this.payError.set('');
     this.pagoResultado.set(null);

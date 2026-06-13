@@ -139,9 +139,9 @@ const validar = async (codigoQr) => {
 
   const pagoQr = await pagosQrRepository.findByCodigo(`ageru://qr/${token}`);
   if (!pagoQr) return { notFound: true, message: 'QR no encontrado' };
+  const enriched = await enrichQr(pagoQr);
   return {
-    ...pagoQr,
-    montoSoles: pagoQr.monto_centavos ? (pagoQr.monto_centavos / 100).toFixed(2) : null,
+    ...enriched,
     requiereMonto: pagoQr.tipo_qr === 'ABIERTO' && !pagoQr.monto_centavos
   };
 };
