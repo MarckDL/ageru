@@ -1,16 +1,18 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
+import { AppIconComponent } from '../../../shared/components/app-icon.component';
+
 @Component({
   standalone: true,
   selector: 'app-landing-page',
-  imports: [RouterLink],
+  imports: [RouterLink, AppIconComponent],
   template: `
     <div class="landing">
       <!-- Navbar -->
       <nav class="navbar">
         <div class="nav-brand">
-          <span class="logo-icon">⚡</span>
+          <app-icon name="zap" [size]="24" className="logo-icon" />
           <span class="logo-text">Ageru</span>
         </div>
         <div class="nav-links">
@@ -24,7 +26,7 @@ import { RouterLink } from '@angular/router';
         <div class="hero-bg-orb orb-1"></div>
         <div class="hero-bg-orb orb-2"></div>
         <div class="hero-content">
-          <span class="hero-badge">🚀 Plataforma Fintech para Comercios</span>
+          <span class="hero-badge"><app-icon name="rocket" [size]="16" /> Plataforma Fintech para Comercios</span>
           <h1 class="hero-title">
             Pagos digitales
             <span class="gradient-text">simples y seguros</span>
@@ -37,7 +39,7 @@ import { RouterLink } from '@angular/router';
           <div class="hero-actions">
             <a routerLink="/login" class="btn-primary">
               <span>Crear cuenta gratis</span>
-              <span class="btn-arrow">→</span>
+              <app-icon name="arrow-right" [size]="18" className="btn-arrow" />
             </a>
             <a href="#features" class="btn-ghost">Ver características</a>
           </div>
@@ -68,32 +70,32 @@ import { RouterLink } from '@angular/router';
         </h2>
         <div class="features-grid">
           <div class="feature-card">
-            <div class="feature-icon">🔐</div>
+            <app-icon name="lock" [size]="32" className="feature-icon" />
             <h3>Autenticación Segura</h3>
             <p>Protección con JWT para cada sesión. Middleware de seguridad en cada operación financiera.</p>
           </div>
           <div class="feature-card">
-            <div class="feature-icon">📱</div>
+            <app-icon name="qr-code" [size]="32" className="feature-icon" />
             <h3>Pagos QR</h3>
             <p>Genera códigos QR fijos o abiertos. Tus clientes pagan escaneando desde su celular.</p>
           </div>
           <div class="feature-card">
-            <div class="feature-icon">💸</div>
+            <app-icon name="banknote" [size]="32" className="feature-icon" />
             <h3>Transferencias</h3>
             <p>Envía y recibe dinero entre cuentas con precisión BIGINT. Sin errores de redondeo.</p>
           </div>
           <div class="feature-card">
-            <div class="feature-icon">📊</div>
+            <app-icon name="bar-chart" [size]="32" className="feature-icon" />
             <h3>Dashboard Interactivo</h3>
             <p>Visualiza tus transacciones con gráficos Highcharts en tiempo real.</p>
           </div>
           <div class="feature-card">
-            <div class="feature-icon">🏪</div>
+            <app-icon name="store" [size]="32" className="feature-icon" />
             <h3>Gestión de Comercios</h3>
             <p>Registra tu negocio con RUC, categoría y genera tu QR permanente del local.</p>
           </div>
           <div class="feature-card">
-            <div class="feature-icon">🔄</div>
+            <app-icon name="refresh-cw" [size]="32" className="feature-icon" />
             <h3>Trazabilidad Total</h3>
             <p>Cada operación queda registrada con timestamp UTC y referencia única.</p>
           </div>
@@ -140,7 +142,7 @@ import { RouterLink } from '@angular/router';
           <p>Empieza a cobrar digitalmente en minutos. Sin costos ocultos.</p>
           <a routerLink="/login" class="btn-primary btn-lg">
             <span>Comenzar ahora</span>
-            <span class="btn-arrow">→</span>
+            <app-icon name="arrow-right" [size]="18" className="btn-arrow" />
           </a>
         </div>
       </section>
@@ -149,7 +151,7 @@ import { RouterLink } from '@angular/router';
       <footer class="footer">
         <div class="footer-content">
           <div class="footer-brand">
-            <span class="logo-icon">⚡</span>
+            <app-icon name="zap" [size]="20" className="logo-icon" />
             <span class="logo-text">Ageru</span>
           </div>
           <p class="footer-text">
@@ -181,12 +183,12 @@ import { RouterLink } from '@angular/router';
       gap: 0.5rem;
     }
     .logo-icon {
-      font-size: 1.5rem;
+      color: var(--primary-500);
     }
     .logo-text {
       font-size: 1.4rem;
       font-weight: 700;
-      background: linear-gradient(135deg, var(--primary-400), #e879f9);
+      background: linear-gradient(135deg, var(--primary-500), #ffffff);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -207,17 +209,17 @@ import { RouterLink } from '@angular/router';
     }
     .btn-primary-sm {
       padding: 0.5rem 1.2rem;
-      background: linear-gradient(135deg, var(--primary-600), var(--primary-500));
-      color: #fff;
+      background: linear-gradient(135deg, var(--primary-500), var(--primary-400));
+      color: #000000;
       border-radius: var(--radius-full);
       font-size: 0.85rem;
       font-weight: 600;
       transition: all var(--transition-fast);
     }
     .btn-primary-sm:hover {
-      background: linear-gradient(135deg, var(--primary-500), var(--primary-400));
+      background: linear-gradient(135deg, var(--primary-400), var(--primary-300));
       box-shadow: var(--shadow-glow);
-      color: #fff;
+      color: #000000;
     }
 
     /* ── Hero ── */
@@ -246,7 +248,7 @@ import { RouterLink } from '@angular/router';
     .orb-2 {
       width: 300px;
       height: 300px;
-      background: #e879f9;
+      background: var(--primary-400);
       bottom: -50px;
       left: -80px;
       animation: float 10s ease-in-out infinite reverse;
@@ -256,10 +258,12 @@ import { RouterLink } from '@angular/router';
       z-index: 1;
     }
     .hero-badge {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
       padding: 0.4rem 1rem;
-      background: rgba(139, 92, 246, 0.12);
-      border: 1px solid rgba(139, 92, 246, 0.25);
+      background: rgba(255, 178, 0, 0.12);
+      border: 1px solid rgba(255, 178, 0, 0.25);
       border-radius: var(--radius-full);
       font-size: 0.85rem;
       color: var(--primary-300);
@@ -295,8 +299,8 @@ import { RouterLink } from '@angular/router';
       align-items: center;
       gap: 0.5rem;
       padding: 0.85rem 1.8rem;
-      background: linear-gradient(135deg, var(--primary-600), var(--primary-500));
-      color: #fff;
+      background: linear-gradient(135deg, var(--primary-500), var(--primary-400));
+      color: #000000;
       border-radius: var(--radius-full);
       font-weight: 600;
       font-size: 1rem;
@@ -305,10 +309,10 @@ import { RouterLink } from '@angular/router';
       cursor: pointer;
     }
     .btn-primary:hover {
-      background: linear-gradient(135deg, var(--primary-500), var(--primary-400));
+      background: linear-gradient(135deg, var(--primary-400), var(--primary-300));
       box-shadow: var(--shadow-glow);
       transform: translateY(-2px);
-      color: #fff;
+      color: #000000;
     }
     .btn-lg {
       padding: 1rem 2.2rem;
@@ -335,7 +339,7 @@ import { RouterLink } from '@angular/router';
     .btn-ghost:hover {
       border-color: var(--primary-500);
       color: var(--primary-400);
-      background: rgba(139, 92, 246, 0.06);
+      background: rgba(255, 178, 0, 0.06);
     }
 
     .hero-stats {
@@ -399,7 +403,7 @@ import { RouterLink } from '@angular/router';
       box-shadow: var(--shadow-md);
     }
     .feature-icon {
-      font-size: 2rem;
+      color: var(--primary-500);
       margin-bottom: 0.75rem;
     }
     .feature-card h3 {
@@ -436,7 +440,7 @@ import { RouterLink } from '@angular/router';
     }
     .tech-item:hover {
       border-color: var(--primary-600);
-      box-shadow: 0 0 12px rgba(139, 92, 246, 0.15);
+      box-shadow: 0 0 12px rgba(255, 178, 0, 0.15);
     }
     .tech-name {
       font-weight: 600;
@@ -499,7 +503,7 @@ import { RouterLink } from '@angular/router';
     }
 
     .gradient-text {
-      background: linear-gradient(135deg, var(--primary-400), var(--primary-300), #e879f9);
+      background: linear-gradient(135deg, var(--primary-500), var(--primary-300), #ffffff);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;

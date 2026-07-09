@@ -7,20 +7,22 @@ import {
 } from '../../../core/auth/auth.service';
 import { CommonModule } from '@angular/common';
 
+import { AppIconComponent } from '../../../shared/components/app-icon.component';
+
 @Component({
   standalone: true,
   selector: 'app-login-page',
-  imports: [RouterLink, FormsModule, CommonModule],
+  imports: [RouterLink, FormsModule, CommonModule, AppIconComponent],
   template: `
     <div class="login-wrapper">
       <div class="login-bg-orb orb-1"></div>
       <div class="login-bg-orb orb-2"></div>
 
       <div class="login-card">
-        <a routerLink="/" class="back-link">← Volver al inicio</a>
+        <a routerLink="/" class="back-link"><app-icon name="arrow-left" [size]="16" /> Volver al inicio</a>
 
         <div class="brand">
-          <span class="logo-icon">⚡</span>
+          <app-icon name="zap" [size]="24" className="logo-icon" />
           <h1 class="logo-text">Ageru</h1>
         </div>
         <p class="subtitle">
@@ -189,7 +191,7 @@ import { CommonModule } from '@angular/common';
     .orb-2 {
       width: 350px;
       height: 350px;
-      background: #e879f9;
+      background: var(--primary-400);
       bottom: -100px;
       right: -100px;
       animation: float 10s ease-in-out infinite reverse;
@@ -209,7 +211,9 @@ import { CommonModule } from '@angular/common';
     }
 
     .back-link {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
       font-size: 0.85rem;
       color: var(--text-muted);
       margin-bottom: 1.25rem;
@@ -225,11 +229,11 @@ import { CommonModule } from '@angular/common';
       gap: 0.5rem;
       margin-bottom: 0.25rem;
     }
-    .logo-icon { font-size: 1.5rem; }
+    .logo-icon { color: var(--primary-500); }
     .logo-text {
       font-size: 1.5rem;
       font-weight: 700;
-      background: linear-gradient(135deg, var(--primary-400), #e879f9);
+      background: linear-gradient(135deg, var(--primary-500), #ffffff);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -264,8 +268,8 @@ import { CommonModule } from '@angular/common';
       font-family: inherit;
     }
     .tabs button.active {
-      background: linear-gradient(135deg, var(--primary-700), var(--primary-600));
-      color: #fff;
+      background: linear-gradient(135deg, var(--primary-500), var(--primary-400));
+      color: #000000;
       box-shadow: var(--shadow-sm);
     }
     .tabs button:not(.active):hover {
@@ -307,14 +311,14 @@ import { CommonModule } from '@angular/common';
     }
     .field input:focus {
       border-color: var(--primary-500);
-      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+      box-shadow: 0 0 0 3px rgba(255, 178, 0, 0.15);
     }
 
     .btn-submit {
       width: 100%;
       padding: 0.75rem;
-      background: linear-gradient(135deg, var(--primary-600), var(--primary-500));
-      color: #fff;
+      background: linear-gradient(135deg, var(--primary-500), var(--primary-400));
+      color: #000000;
       border: none;
       border-radius: var(--radius-sm);
       font-size: 0.95rem;

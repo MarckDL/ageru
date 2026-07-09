@@ -5,10 +5,12 @@ import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../core/auth/auth.service';
 import { environment } from '../../../../environments/environment';
 
+import { AppIconComponent } from '../../../shared/components/app-icon.component';
+
 @Component({
   standalone: true,
   selector: 'app-dashboard-home',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, AppIconComponent],
   template: `
     <div class="home">
       <div class="welcome-card">
@@ -20,28 +22,28 @@ import { environment } from '../../../../environments/environment';
 
       <div class="stats-grid">
         <div class="stat-card">
-          <div class="stat-icon">💰</div>
+          <app-icon name="wallet" [size]="28" className="stat-icon" />
           <div class="stat-body">
             <span class="stat-label">Saldo disponible</span>
             <span class="stat-value">S/ {{ saldo() }}</span>
           </div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon">📊</div>
+          <app-icon name="bar-chart" [size]="28" className="stat-icon" />
           <div class="stat-body">
             <span class="stat-label">Límite diario</span>
             <span class="stat-value">S/ {{ limiteDiario() }}</span>
           </div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon">💳</div>
+          <app-icon name="credit-card" [size]="28" className="stat-icon" />
           <div class="stat-body">
             <span class="stat-label">Cuenta</span>
             <span class="stat-value">{{ numeroCuenta() }}</span>
           </div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon">🏦</div>
+          <app-icon name="building" [size]="28" className="stat-icon" />
           <div class="stat-body">
             <span class="stat-label">Banco</span>
             <span class="stat-value">{{ banco() }}</span>
@@ -53,43 +55,43 @@ import { environment } from '../../../../environments/environment';
         <h2>Accesos rápidos</h2>
         <div class="actions-grid">
           <a routerLink="/dashboard/perfil" class="action-card">
-            <span class="action-icon">👤</span>
+            <app-icon name="user" [size]="24" className="action-icon" />
             <span class="action-label">Mi Perfil</span>
           </a>
           <a routerLink="/dashboard/cuentas" class="action-card">
-            <span class="action-icon">💳</span>
+            <app-icon name="credit-card" [size]="24" className="action-icon" />
             <span class="action-label">Mis Cuentas</span>
           </a>
           <a routerLink="/dashboard/movimientos" class="action-card">
-            <span class="action-icon">📋</span>
+            <app-icon name="list" [size]="24" className="action-icon" />
             <span class="action-label">Movimientos</span>
           </a>
           <a routerLink="/dashboard/transferencias" class="action-card">
-            <span class="action-icon">$</span>
+            <app-icon name="arrow-left-right" [size]="24" className="action-icon" />
             <span class="action-label">Transferencias</span>
           </a>
           <a routerLink="/dashboard/pagos-qr" class="action-card">
-            <span class="action-icon">QR</span>
+            <app-icon name="qr-code" [size]="24" className="action-icon" />
             <span class="action-label">Pagos QR</span>
           </a>
           <a routerLink="/dashboard/analitica" class="action-card">
-            <span class="action-icon">A</span>
+            <app-icon name="bar-chart" [size]="24" className="action-icon" />
             <span class="action-label">Analitica</span>
           </a>
           <a routerLink="/dashboard/comercios" class="action-card">
-            <span class="action-icon">C</span>
+            <app-icon name="store" [size]="24" className="action-icon" />
             <span class="action-label">Comercios</span>
           </a>
           <a routerLink="/dashboard/dispositivos" class="action-card">
-            <span class="action-icon">D</span>
+            <app-icon name="smartphone" [size]="24" className="action-icon" />
             <span class="action-label">Dispositivos</span>
           </a>
           <a routerLink="/dashboard/bancos" class="action-card">
-            <span class="action-icon">B</span>
+            <app-icon name="building" [size]="24" className="action-icon" />
             <span class="action-label">Bancos</span>
           </a>
           <a routerLink="/dashboard/usuarios" class="action-card">
-            <span class="action-icon">👥</span>
+            <app-icon name="users" [size]="24" className="action-icon" />
             <span class="action-label">Usuarios</span>
           </a>
         </div>
@@ -118,7 +120,7 @@ import { environment } from '../../../../environments/environment';
       font-size: 0.95rem;
     }
     .gradient-text {
-      background: linear-gradient(135deg, var(--primary-400), #e879f9);
+      background: linear-gradient(135deg, var(--primary-500), #ffffff);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -145,7 +147,7 @@ import { environment } from '../../../../environments/environment';
       transform: translateY(-2px);
       box-shadow: var(--shadow-md);
     }
-    .stat-icon { font-size: 1.8rem; }
+    .stat-icon { color: var(--primary-500); }
     .stat-body {
       display: flex;
       flex-direction: column;
@@ -190,7 +192,7 @@ import { environment } from '../../../../environments/environment';
       transform: translateY(-3px);
       box-shadow: var(--shadow-md);
     }
-    .action-icon { font-size: 1.45rem; font-weight: 800; min-height: 2rem; }
+    .action-icon { color: var(--primary-500); min-height: 2rem; }
     .action-label {
       font-size: 0.9rem;
       font-weight: 500;

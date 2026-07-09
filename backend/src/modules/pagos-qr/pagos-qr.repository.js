@@ -2,7 +2,7 @@ const crypto = require('crypto');
 const { getConnection, sql } = require('../../config/db');
 
 let schemaEnsured = false;
-
+ 
 const ensurePagosQrSchema = async () => {
   if (schemaEnsured) return;
 

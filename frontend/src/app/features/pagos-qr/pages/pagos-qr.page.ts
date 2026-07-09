@@ -128,38 +128,41 @@ import { environment } from '../../../../environments/environment';
   `,
   styles: [`
     .qr-page { max-width: 1120px; animation: fadeIn 0.4s ease; }
-    .page-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem; }
+    .page-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem; color: #ffffff; }
     .page-subtitle { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem; }
     .qr-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; align-items: start; margin-bottom: 1rem; }
-    .panel { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 1.25rem; }
-    .panel h2 { font-size: 1.05rem; margin-bottom: 0.9rem; }
+    .panel { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 1.25rem; border-top: 2px solid var(--primary-500); }
+    .panel h2 { font-size: 1.05rem; margin-bottom: 0.9rem; color: var(--primary-500); }
     .field { display: flex; flex-direction: column; gap: 0.25rem; margin-bottom: 0.8rem; }
     .field label { color: var(--text-muted); font-size: 0.78rem; }
     .field input, .field select, .field textarea { padding: 0.65rem 0.75rem; background: var(--bg-input); border: 1px solid var(--border-default); border-radius: var(--radius-sm); color: var(--text-primary); font: inherit; outline: none; resize: vertical; }
-    .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--primary-500); }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--primary-500); box-shadow: 0 0 0 2px rgba(255, 178, 0, 0.15); }
     .mode-tabs { display: inline-flex; background: var(--bg-input); border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: 0.2rem; margin-bottom: 0.8rem; }
-    .mode-tabs button { border: 0; background: transparent; color: var(--text-secondary); padding: 0.45rem 0.8rem; border-radius: var(--radius-sm); font: inherit; cursor: pointer; }
-    .mode-tabs button.active { background: var(--primary-600); color: #fff; }
+    .mode-tabs button { border: 0; background: transparent; color: var(--text-secondary); padding: 0.45rem 0.8rem; border-radius: var(--radius-sm); font: inherit; cursor: pointer; transition: color var(--transition-fast); }
+    .mode-tabs button.active { background: var(--primary-500); color: #000000; font-weight: 700; }
     .actions { display: flex; gap: 0.6rem; }
-    .btn-primary, .btn-secondary { border: 0; border-radius: var(--radius-sm); padding: 0.7rem 1rem; font-weight: 700; font-family: inherit; cursor: pointer; }
-    .btn-primary { background: linear-gradient(135deg, var(--primary-600), var(--primary-500)); color: #fff; }
+    .btn-primary, .btn-secondary { border: 0; border-radius: var(--radius-sm); padding: 0.7rem 1rem; font-weight: 700; font-family: inherit; cursor: pointer; transition: all var(--transition-fast); }
+    .btn-primary { background: linear-gradient(135deg, var(--primary-500), var(--primary-400)); color: #000000; }
+    .btn-primary:hover:not(:disabled) { background: linear-gradient(135deg, var(--primary-400), var(--primary-300)); box-shadow: var(--shadow-glow); }
     .btn-secondary { background: var(--bg-elevated); color: var(--text-primary); border: 1px solid var(--border-default); }
+    .btn-secondary:hover:not(:disabled) { border-color: var(--primary-500); color: var(--primary-500); }
     .btn-primary:disabled, .btn-secondary:disabled { opacity: 0.55; cursor: not-allowed; }
     .btn-pay { width: 100%; margin-top: 0.5rem; }
     .help-pay { margin-top: 0.5rem; font-size: 0.82rem; color: var(--text-muted); text-align: center; }
     .btn-link { border: 0; background: transparent; color: var(--error); cursor: pointer; font-weight: 700; }
     .qr-result { margin-top: 1rem; display: grid; place-items: center; gap: 0.75rem; }
-    .qr-result img { width: 220px; border-radius: var(--radius-sm); background: #fff; padding: 0.5rem; }
-    .qr-code { width: 100%; padding: 0.6rem; background: var(--bg-input); border-radius: var(--radius-sm); font-size: 0.75rem; color: var(--primary-300); overflow-wrap: anywhere; }
-    .qr-detail { margin-top: 0.85rem; padding: 0.75rem; background: var(--bg-input); border-radius: var(--radius-sm); display: flex; flex-direction: column; gap: 0.25rem; }
+    .qr-result img { width: 220px; border-radius: var(--radius-sm); background: #ffffff; padding: 0.5rem; border: 2px solid var(--primary-500); }
+    .qr-code { width: 100%; padding: 0.6rem; background: var(--bg-input); border-radius: var(--radius-sm); font-size: 0.75rem; color: var(--primary-500); overflow-wrap: anywhere; border: 1px solid rgba(255, 178, 0, 0.2); }
+    .qr-detail { margin-top: 0.85rem; padding: 0.75rem; background: var(--bg-input); border-radius: var(--radius-sm); display: flex; flex-direction: column; gap: 0.25rem; border: 1px solid var(--border-default); }
     .qr-preview { display: grid; place-items: center; margin-bottom: 0.5rem; }
-    .qr-preview img { width: 180px; border-radius: var(--radius-sm); background: #fff; padding: 0.4rem; }
+    .qr-preview img { width: 180px; border-radius: var(--radius-sm); background: #ffffff; padding: 0.4rem; border: 2px solid var(--primary-500); }
     .qr-detail span { color: var(--text-secondary); font-size: 0.85rem; }
     .qr-detail.success { border: 1px solid rgba(34, 197, 94, 0.35); }
     .history { margin-top: 1rem; }
     .empty { color: var(--text-secondary); font-size: 0.9rem; }
     .qr-list { display: grid; gap: 0.6rem; }
-    .qr-row { display: grid; grid-template-columns: 1fr auto auto; gap: 0.75rem; align-items: center; padding: 0.75rem; background: var(--bg-input); border-radius: var(--radius-sm); }
+    .qr-row { display: grid; grid-template-columns: 1fr auto auto; gap: 0.75rem; align-items: center; padding: 0.75rem; background: var(--bg-input); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); transition: border-color var(--transition-fast); }
+    .qr-row:hover { border-color: rgba(255, 178, 0, 0.3); }
     .qr-row div { display: flex; flex-direction: column; }
     .qr-row span { color: var(--text-secondary); font-size: 0.82rem; }
     .badge { justify-self: start; }

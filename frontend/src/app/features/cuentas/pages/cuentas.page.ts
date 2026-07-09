@@ -5,10 +5,12 @@ import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../core/auth/auth.service';
 import { environment } from '../../../../environments/environment';
 
+import { AppIconComponent } from '../../../shared/components/app-icon.component';
+
 @Component({
   standalone: true,
   selector: 'app-cuentas-page',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AppIconComponent],
   template: `
     <div class="cuentas-page">
       <h1 class="page-title">Mis Cuentas</h1>
@@ -80,7 +82,7 @@ import { environment } from '../../../../environments/environment';
           <div class="config-grid">
             <!-- Límite diario -->
             <div class="config-card">
-              <h3>📊 Límite diario</h3>
+              <h3><app-icon name="bar-chart" [size]="18" /> Límite diario</h3>
               <p>Configura el tope máximo de gasto por día.</p>
               <div class="inline-form">
                 <div class="field">
@@ -96,7 +98,7 @@ import { environment } from '../../../../environments/environment';
 
             <!-- Cambiar banco -->
             <div class="config-card">
-              <h3>🏦 Banco asociado</h3>
+              <h3><app-icon name="building" [size]="18" /> Banco asociado</h3>
               <p>Cambia el banco vinculado a tu cuenta.</p>
               <div class="inline-form">
                 <div class="field">
@@ -115,7 +117,7 @@ import { environment } from '../../../../environments/environment';
 
             <!-- Estado de cuenta -->
             <div class="config-card">
-              <h3>⚡ Estado de cuenta</h3>
+              <h3><app-icon name="activity" [size]="18" /> Estado de cuenta</h3>
               <p>Activa o suspende tu cuenta temporalmente.</p>
               <div class="inline-form">
                 <div class="field">
@@ -194,7 +196,15 @@ import { environment } from '../../../../environments/environment';
     .config-card {
       background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 1.25rem;
     }
-    .config-card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.3rem; }
+    .config-card h3 {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+      color: var(--primary-500);
+    }
     .config-card p { color: var(--text-secondary); font-size: 0.82rem; margin-bottom: 0.75rem; }
     .inline-form { display: flex; gap: 0.5rem; align-items: flex-end; }
     .field { display: flex; flex-direction: column; gap: 0.2rem; flex: 1; }

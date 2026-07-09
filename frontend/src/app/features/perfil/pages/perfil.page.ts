@@ -223,7 +223,7 @@ interface PerfilData {
     }
     .field input:focus {
       border-color: var(--primary-500);
-      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+      box-shadow: 0 0 0 3px rgba(255, 178, 0, 0.15);
     }
     .btn-save {
       padding: 0.7rem 1.5rem;

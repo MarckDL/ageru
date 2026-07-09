@@ -3,67 +3,69 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/auth/auth.service';
 
+import { AppIconComponent } from '../../../shared/components/app-icon.component';
+
 @Component({
   standalone: true,
   selector: 'app-dashboard-page',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, AppIconComponent],
   template: `
     <div class="dashboard-layout">
       <!-- Sidebar -->
       <aside class="sidebar" [class.collapsed]="sidebarCollapsed()">
         <div class="sidebar-header">
           <a routerLink="/dashboard" class="sidebar-brand">
-            <span class="logo-icon">⚡</span>
+            <app-icon name="zap" [size]="22" className="logo-icon" />
             <span class="brand-name" *ngIf="!sidebarCollapsed()">Ageru</span>
           </a>
           <button class="toggle-btn" (click)="toggleSidebar()">
-            {{ sidebarCollapsed() ? '→' : '←' }}
+            <app-icon [name]="sidebarCollapsed() ? 'chevron-right' : 'chevron-left'" [size]="18" />
           </button>
         </div>
 
         <nav class="sidebar-nav">
           <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item">
-            <span class="nav-icon">🏠</span>
+            <app-icon name="home" [size]="18" className="nav-icon" />
             <span class="nav-label" *ngIf="!sidebarCollapsed()">Inicio</span>
           </a>
           <a routerLink="/dashboard/perfil" routerLinkActive="active" class="nav-item">
-            <span class="nav-icon">👤</span>
+            <app-icon name="user" [size]="18" className="nav-icon" />
             <span class="nav-label" *ngIf="!sidebarCollapsed()">Mi Perfil</span>
           </a>
           <a routerLink="/dashboard/cuentas" routerLinkActive="active" class="nav-item">
-            <span class="nav-icon">💳</span>
+            <app-icon name="credit-card" [size]="18" className="nav-icon" />
             <span class="nav-label" *ngIf="!sidebarCollapsed()">Mis Cuentas</span>
           </a>
           <a routerLink="/dashboard/movimientos" routerLinkActive="active" class="nav-item">
-            <span class="nav-icon">📋</span>
+            <app-icon name="list" [size]="18" className="nav-icon" />
             <span class="nav-label" *ngIf="!sidebarCollapsed()">Movimientos</span>
           </a>
           <a routerLink="/dashboard/transferencias" routerLinkActive="active" class="nav-item">
-            <span class="nav-icon">$</span>
+            <app-icon name="arrow-left-right" [size]="18" className="nav-icon" />
             <span class="nav-label" *ngIf="!sidebarCollapsed()">Transferencias</span>
           </a>
           <a routerLink="/dashboard/pagos-qr" routerLinkActive="active" class="nav-item">
-            <span class="nav-icon">QR</span>
+            <app-icon name="qr-code" [size]="18" className="nav-icon" />
             <span class="nav-label" *ngIf="!sidebarCollapsed()">Pagos QR</span>
           </a>
           <a routerLink="/dashboard/analitica" routerLinkActive="active" class="nav-item">
-            <span class="nav-icon">A</span>
+            <app-icon name="bar-chart" [size]="18" className="nav-icon" />
             <span class="nav-label" *ngIf="!sidebarCollapsed()">Analitica</span>
           </a>
           <a routerLink="/dashboard/comercios" routerLinkActive="active" class="nav-item">
-            <span class="nav-icon">C</span>
+            <app-icon name="store" [size]="18" className="nav-icon" />
             <span class="nav-label" *ngIf="!sidebarCollapsed()">Comercios</span>
           </a>
           <a routerLink="/dashboard/dispositivos" routerLinkActive="active" class="nav-item">
-            <span class="nav-icon">D</span>
+            <app-icon name="smartphone" [size]="18" className="nav-icon" />
             <span class="nav-label" *ngIf="!sidebarCollapsed()">Dispositivos</span>
           </a>
           <a routerLink="/dashboard/bancos" routerLinkActive="active" class="nav-item">
-            <span class="nav-icon">B</span>
+            <app-icon name="building" [size]="18" className="nav-icon" />
             <span class="nav-label" *ngIf="!sidebarCollapsed()">Bancos</span>
           </a>
           <a routerLink="/dashboard/usuarios" routerLinkActive="active" class="nav-item">
-            <span class="nav-icon">👥</span>
+            <app-icon name="users" [size]="18" className="nav-icon" />
             <span class="nav-label" *ngIf="!sidebarCollapsed()">Usuarios</span>
           </a>
         </nav>
@@ -77,7 +79,7 @@ import { AuthService } from '../../../core/auth/auth.service';
             </div>
           </div>
           <button class="logout-btn" (click)="logout()" title="Cerrar sesión">
-            <span>🚪</span>
+            <app-icon name="log-out" [size]="18" />
             <span *ngIf="!sidebarCollapsed()">Salir</span>
           </button>
         </div>
@@ -127,12 +129,12 @@ import { AuthService } from '../../../core/auth/auth.service';
       text-decoration: none;
     }
     .logo-icon {
-      font-size: 1.4rem;
+      color: var(--primary-500);
     }
     .brand-name {
       font-size: 1.25rem;
       font-weight: 700;
-      background: linear-gradient(135deg, var(--primary-400), #e879f9);
+      background: linear-gradient(135deg, var(--primary-500), #ffffff);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -172,19 +174,17 @@ import { AuthService } from '../../../core/auth/auth.service';
       white-space: nowrap;
     }
     .nav-item:hover {
-      background: rgba(139, 92, 246, 0.08);
+      background: rgba(255, 178, 0, 0.08);
       color: var(--text-primary);
     }
     .nav-item.active {
-      background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(139, 92, 246, 0.08));
-      color: var(--primary-400);
+      background: linear-gradient(135deg, rgba(255, 178, 0, 0.18), rgba(255, 178, 0, 0.06));
+      color: var(--primary-500);
       border-left: 3px solid var(--primary-500);
     }
     .nav-icon {
-      font-size: 0.95rem;
       min-width: 1.5rem;
-      text-align: center;
-      font-weight: 700;
+      color: currentColor;
     }
 
     .sidebar-footer {
@@ -202,8 +202,8 @@ import { AuthService } from '../../../core/auth/auth.service';
       width: 36px;
       height: 36px;
       border-radius: var(--radius-full);
-      background: linear-gradient(135deg, var(--primary-600), var(--primary-500));
-      color: #fff;
+      background: linear-gradient(135deg, var(--primary-500), var(--primary-400));
+      color: #000000;
       display: flex;
       align-items: center;
       justify-content: center;

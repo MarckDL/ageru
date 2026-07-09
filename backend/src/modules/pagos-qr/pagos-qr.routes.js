@@ -14,7 +14,7 @@ const router = express.Router();
 
 router.get('/comercios', requireAuth, listarComercios);
 router.post('/', requireAuth, crear);
-router.get('/', requireAuth, listar);
+router.get('/', requireAuth, listar); 
 router.post('/validar', requireAuth, validar);
 router.post('/pagar', requireAuth, pagar);
 router.get('/:id', requireAuth, estado);

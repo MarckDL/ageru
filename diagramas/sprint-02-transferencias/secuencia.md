@@ -1,125 +1,61 @@
-# Sprint 2 — Diagrama de secuencia (Transferencias)
+# Sprint 2 - Diagrama de secuencia UML
 
-## Secuencia: Transferencia por teléfono
+Flujo principal de transferencias usando telefono, numero de cuenta y comprobante.
 
-```mermaid
-sequenceDiagram
-    actor U as Usuario
-    participant TP as TransferenciasPage
-    participant AS as AuthService
-    participant MW as requireAuth
-    participant CTRL as transacciones.controller
-    participant SVC as transacciones.service
-    participant CR as cuentas.repository
-    participant TR as transacciones.repository
-    participant DB as SQL Server
+```plantuml
+@startuml
+title Sprint 2 - Transferencias
 
-    U->>TP: Ingresa teléfono, monto S/ 50.00
-    TP->>TP: montoCentavos = Math.round(50 * 100) = 5000
-    TP->>AS: getAuthHeaders()
-    TP->>CTRL: POST /transferir { telefono, montoCentavos: 5000 }
+actor Usuario as U
+boundary "Interfaz de Transferencias" as UI
+control "transacciones.controller" as TC
+control "require-auth" as MW
+control "transacciones.service" as TS
+control "cuentas.repository" as CR
+control "transacciones.repository" as TR
+database "BD de Transferencias" as DB
 
-    CTRL->>MW: requireAuth
-    MW->>MW: getUserByToken → req.user
-    MW->>CTRL: next()
+U -> UI : transferir()
+UI -> TC : POST /api/transacciones/transferir\ntransferir(req.body)
+TC -> MW : requireAuth(req, res, next)
+MW --> TC : req.user
+TC -> TS : transferir(usuarioId, req.body)
+TS -> TS : parseMontoCentavos(montoCentavos)
+TS -> CR : findCuentaPrincipal(usuarioId)
+CR -> DB : SELECT cuenta principal del usuario
 
-    CTRL->>SVC: transferir(usuarioId, payload)
-    SVC->>SVC: parseMontoCentavos(5000) → 5000
+alt destino por telefono
+  TS -> TR : findCuentaByTelefono(telefono)
+  TR -> DB : SELECT cuenta destino por telefono
+else destino por numero de cuenta
+  TS -> TR : findCuentaByNumeroCuenta(numeroCuenta)
+  TR -> DB : SELECT cuenta destino por numero de cuenta
+else destino por id
+  TS -> TR : findCuentaById(cuentaDestinoId)
+  TR -> DB : SELECT cuenta destino por id
+end
 
-    SVC->>CR: findCuentaPrincipal(usuarioId)
-    CR->>DB: SELECT cuenta del usuario logueado
-    DB-->>CR: cuentaOrigen
+TS -> TR : getSumaTxHoy(cuentaOrigenId)
+TR -> DB : SUM(transacciones de hoy UTC)
+TS -> TS : validarTransferencia(cuentaOrigen, cuentaDestino, montoCentavos)
 
-    SVC->>TR: findCuentaByTelefono(telefono)
-    Note over TR: RF24 — JOIN cuentas + usuarios WHERE telefono
-    TR->>DB: SELECT cuenta destino
-    DB-->>TR: cuentaDestino
+alt Validacion falla
+  TS --> TC : { badRequest, notFound, forbidden }
+  TC --> UI : mostrarError(mensaje)
+else Transferencia valida
+  TS -> TR : ejecutarTransferencia(cuentaOrigenId, cuentaDestinoId, montoCentavos, tipo, descripcion)
+  TR -> DB : BEGIN TRANSACTION
+  TR -> DB : UPDATE cuentas origen
+  TR -> DB : UPDATE cuentas destino
+  TR -> DB : INSERT transacciones
+  TR -> DB : COMMIT
+  TS -> TS : buildTransferResponse(transaccion, mensaje)
+  TS --> TC : { transaccion, notificacion, comprobante }
+  TC --> UI : mostrarComprobante(comprobante)
+end
 
-    SVC->>SVC: validarTransferencia(...)
-    SVC->>TR: getSumaTxHoy(cuentaOrigenId)
-    Note over TR: SUM(monto_centavos) WHERE created_at = hoy UTC
-    TR->>DB: SELECT total_hoy
-    DB-->>TR: usadoHoy
-
-    alt Validación falla
-        SVC-->>TP: 400 { message }
-    else Validación OK
-        SVC->>TR: ejecutarTransferencia({ cuentaOrigenId, cuentaDestinoId, montoCentavos, tipo: 'TRANSFERENCIA' })
-        TR->>DB: BEGIN TRANSACTION
-        TR->>DB: UPDATE cuentas SET saldo -= 5000 (origen, BIGINT)
-        Note over DB: WHERE saldo_centavos >= 5000 AND estado='ACTIVA'
-        TR->>DB: UPDATE cuentas SET saldo += 5000 (destino)
-        TR->>DB: INSERT transacciones (tipo=TRANSFERENCIA, estado=COMPLETADA)
-        Note over DB: referencia_externa = TX-{timestamp}-{hex}
-        TR->>DB: COMMIT
-        DB-->>TR: transaccion insertada
-        TR-->>SVC: { transaccion }
-        SVC->>SVC: buildTransferResponse(transaccion, 'Transferencia confirmada')
-        SVC-->>TP: { transaccion, notificacion, comprobante }
-        TP-->>U: Muestra comprobante con código TX-...
-    end
+note over TR,DB
+Los montos se almacenan en BIGINT y los movimientos quedan en transacciones.
+end note
+@enduml
 ```
-
----
-
-## Secuencia: Fallo por saldo insuficiente (doble verificación)
-
-```mermaid
-sequenceDiagram
-    participant SVC as transacciones.service
-    participant TR as transacciones.repository
-    participant DB as SQL Server
-
-    Note over SVC: 1ª verificación en validarTransferencia (lectura)
-    SVC->>SVC: saldo_centavos >= montoCentavos
-
-    SVC->>TR: ejecutarTransferencia(...)
-    TR->>DB: BEGIN TRANSACTION
-    TR->>DB: UPDATE origen WHERE saldo >= monto
-    Note over DB: 2ª verificación atómica en el UPDATE<br/>evita condición de carrera
-    DB-->>TR: rowsAffected = 0
-    TR->>DB: ROLLBACK
-    TR-->>SVC: { error: 'SALDO_INSUFICIENTE' }
-    SVC-->>SVC: 400 Saldo insuficiente
-```
-
-> La validación previa mejora la UX (error rápido); el `UPDATE ... WHERE saldo >= @monto` garantiza consistencia bajo concurrencia.
-
----
-
-## Secuencia: Listar movimientos
-
-```mermaid
-sequenceDiagram
-    actor U as Usuario
-    participant FE as Frontend
-    participant CTRL as transacciones.controller
-    participant SVC as transacciones.service
-    participant CR as cuentas.repository
-    participant TR as transacciones.repository
-    participant DB as SQL Server
-
-    U->>FE: Abre página Movimientos
-    FE->>CTRL: GET /api/transacciones?tipo=TRANSFERENCIA
-    CTRL->>SVC: listar(usuarioId, filters)
-    SVC->>CR: findCuentaPrincipal(usuarioId)
-    CR->>DB: SELECT cuenta
-    DB-->>CR: cuenta
-    SVC->>TR: findTransacciones(cuenta.id, filters)
-    TR->>DB: SELECT transacciones WHERE origen OR destino = cuenta
-    Note over DB: CAST(monto_centavos/100.0 AS DECIMAL) AS monto_soles
-    DB-->>TR: recordset[]
-    TR-->>FE: JSON historial
-```
-
-## Referencia rápida de funciones
-
-| Función | Archivo | Descripción |
-|---------|---------|-------------|
-| `transferir()` | `transacciones.service.js` | Orquesta validación + ejecución |
-| `validarTransferencia()` | `transacciones.service.js` | Reglas de negocio pre-transacción |
-| `parseMontoCentavos()` | `transacciones.service.js` | Valida entero positivo seguro |
-| `findCuentaByTelefono()` | `transacciones.repository.js` | Busca destino por celular (RF24) |
-| `getSumaTxHoy()` | `transacciones.repository.js` | Suma gastos del día UTC (RF23) |
-| `ejecutarTransferencia()` | `transacciones.repository.js` | TX SQL: débito + crédito + INSERT |
-| `buildTransferResponse()` | `transacciones.service.js` | Formatea comprobante y notificación |

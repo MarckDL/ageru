@@ -17,10 +17,12 @@ interface Movimiento {
   esSalida: boolean;
 }
 
+import { AppIconComponent } from '../../../shared/components/app-icon.component';
+
 @Component({
   standalone: true,
   selector: 'app-movimientos-page',
-  imports: [CommonModule],
+  imports: [CommonModule, AppIconComponent],
   template: `
     <div class="movimientos-page">
       <h1 class="page-title">Movimientos</h1>
@@ -29,7 +31,7 @@ interface Movimiento {
       <div class="loading" *ngIf="loading()">Cargando movimientos...</div>
 
       <div class="empty-state" *ngIf="!loading() && movimientos().length === 0">
-        <span class="empty-icon">📋</span>
+        <app-icon name="clipboard-list" [size]="40" className="empty-icon" />
         <p>No hay movimientos registrados aún.</p>
       </div>
 
@@ -105,7 +107,7 @@ interface Movimiento {
       padding: 3rem; background: var(--bg-card); border: 1px solid var(--border-subtle);
       border-radius: var(--radius-lg); text-align: center;
     }
-    .empty-icon { font-size: 3rem; }
+    .empty-icon { color: var(--primary-500); margin-bottom: 0.5rem; }
     .empty-state p { color: var(--text-secondary); }
 
     .summary-bar {
@@ -138,7 +140,7 @@ interface Movimiento {
       color: var(--text-secondary);
     }
     .mov-row { transition: background var(--transition-fast); }
-    .mov-row:hover { background: rgba(139, 92, 246, 0.04); }
+    .mov-row:hover { background: rgba(255, 178, 0, 0.04); }
 
     .date-cell { white-space: nowrap; font-size: 0.82rem; }
     .desc-cell { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -150,7 +152,7 @@ interface Movimiento {
       font-weight: 600; text-transform: uppercase;
     }
     .tipo-transferencia { background: var(--info-bg); color: var(--info); }
-    .tipo-pago_qr { background: rgba(139, 92, 246, 0.12); color: var(--primary-400); }
+    .tipo-pago_qr { background: rgba(255, 178, 0, 0.12); color: var(--primary-500); }
     .tipo-recarga { background: var(--success-bg); color: var(--success); }
     .tipo-devolucion { background: var(--warning-bg); color: var(--warning); }
 

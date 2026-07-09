@@ -53,4 +53,40 @@ const ventas = async (usuarioId) => {
   }));
 };
 
-module.exports = { crear, listar, actualizar, ventas };
+const obtenerDesdeAPI = async (ruc) => {
+
+  if (!/^\d{11}$/.test(ruc)) {
+    throw new Error('RUC debe tener 11 dígitos');
+  }
+
+  const token = process.env.APIS_PERU_TOKEN;
+
+  if (!token) {
+    throw new Error('APIS_PERU_TOKEN no configurado');
+  }
+
+  const response = await fetch(
+    `https://dniruc.apisperu.com/api/v1/ruc/${ruc}?token=${token}`
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || 'Error consultando SUNAT');
+  }
+
+  if (!data.ruc) {
+    throw new Error('RUC no encontrado');
+  }
+
+  return data;
+};
+
+
+module.exports = {
+  crear,
+  listar,
+  actualizar,
+  ventas,
+  obtenerDesdeAPI
+};

@@ -100,7 +100,7 @@ interface Usuario {
     .stats { display: flex; gap: 0.5rem; }
     .chip {
       padding: 0.3rem 0.7rem; border-radius: var(--radius-full);
-      background: rgba(139, 92, 246, 0.1); color: var(--primary-400);
+      background: rgba(255, 178, 0, 0.1); color: var(--primary-500);
       font-size: 0.82rem;
     }
     .chip-success {
@@ -128,7 +128,7 @@ interface Usuario {
       color: var(--text-secondary);
     }
     tbody tr { transition: background var(--transition-fast); }
-    tbody tr:hover { background: rgba(139, 92, 246, 0.04); }
+    tbody tr:hover { background: rgba(255, 178, 0, 0.04); }
 
     .name-cell {
       display: flex; align-items: center; gap: 0.6rem;
