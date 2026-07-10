@@ -2,7 +2,7 @@
   <div class="page-hero">
     <div>
       <p class="eyebrow">Ageru Analytics</p>
-      <h1 class="page-title">Analítica</h1>
+      <h1 class="page-title">Analitica</h1>
       <p class="page-subtitle">Resumen visual de ingresos, salidas y comportamiento transaccional.</p>
     </div>
 
@@ -12,7 +12,7 @@
   </div>
 
   @if (loading()) {
-    <div class="loading">Cargando analítica...</div>
+    <div class="loading">Cargando analitica...</div>
   } @else {
     <section class="panel">
       <div class="panel-header">
@@ -43,7 +43,7 @@
       <article class="panel">
         <div class="panel-header">
           <div>
-            <h2>Histórico mensual</h2>
+            <h2>Historico mensual</h2>
             <p>Ingresos y salidas por mes en barras comparativas.</p>
           </div>
         </div>
@@ -55,8 +55,8 @@
       <article class="panel">
         <div class="panel-header">
           <div>
-            <h2>Dona de gastos por categoría</h2>
-            <p>Clasificación de salidas reales según tipo y categoría asociada.</p>
+            <h2>Dona de gastos por categoria</h2>
+            <p>Clasificacion de salidas reales segun tipo y categoria asociada.</p>
           </div>
         </div>
         <div class="chart-box">
@@ -66,130 +66,192 @@
     </section>
 
     @if (isAdvancedMode()) {
+      <div class="analytics-shell">
+        <main class="analytics-main">
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h2>{{ featuredChartTitle() }}</h2>
+                <p>{{ featuredChartDescription() }}</p>
+              </div>
+            </div>
+            <div class="chart-box chart-box-lg">
+              <highcharts-chart [options]="featuredChartOptions()" class="chart"></highcharts-chart>
+            </div>
+          </section>
+
+          @if (analyticsFocus() !== 'COMERCIOS') {
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <h2>{{ featuredSecondaryTitle() }}</h2>
+                  <p>{{ featuredSecondaryDescription() }}</p>
+                </div>
+              </div>
+              <div class="chart-box">
+                <highcharts-chart [options]="featuredSecondaryOptions()" class="chart"></highcharts-chart>
+              </div>
+            </section>
+          }
+
+          @if (analyticsFocus() === 'COMERCIOS') {
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <h2>Detalle de comercios</h2>
+                  <p>Comercios con QR fijo y su recaudaci&oacute;n en {{ periodLabel(commercePeriod()) }}.</p>
+                </div>
+              </div>
+              @if (commercePerformance().length > 0) {
+                <div class="commerce-grid">
+                  @for (commerce of commercePerformance(); track commerce.name; let index = $index) {
+                    <article class="commerce-card">
+                      <span class="rank">#{{ index + 1 }}</span>
+                      <h3>{{ commerce.name }}</h3>
+                      <p>{{ commerce.transactions }} transacciones</p>
+                      <strong>S/ {{ commerce.totalSoles | number:'1.2-2' }}</strong>
+                    </article>
+                  }
+                </div>
+              } @else {
+                <div class="empty-state">No hay movimientos de comercios para el periodo seleccionado.</div>
+              }
+            </section>
+          }
+
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h2>Insights rapidos</h2>
+                <p>Lecturas simples sobre tu comportamiento financiero reciente.</p>
+              </div>
+            </div>
+
+            <div class="insights-grid">
+              @for (insight of insightCards(); track insight.title) {
+                <article class="insight-card">
+                  <span>{{ insight.title }}</span>
+                  <p>{{ insight.text }}</p>
+                </article>
+              }
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h2>Contrapartes frecuentes</h2>
+                <p>Referencias frecuentes de tus transferencias y pagos.</p>
+              </div>
+            </div>
+
+            <div class="rows">
+              @for (item of topContrapartes(); track item.nombre) {
+                <div class="row">
+                  <span>{{ item.nombre }}</span>
+                  <strong>S/ {{ item.montoSoles | number:'1.2-2' }}</strong>
+                </div>
+              }
+            </div>
+          </section>
+        </main>
+
+        <aside class="analytics-sidebar">
+          <section class="panel sidebar-panel">
+            <div class="panel-header">
+              <div>
+                <h2>Panel contextual</h2>
+                <p>Cambia el bloque anal&iacute;tico completo seg&uacute;n el foco y periodo seleccionados.</p>
+              </div>
+            </div>
+
+            <div class="sidebar-block">
+              <span class="sidebar-label">Tipo de analitica</span>
+              <div class="sidebar-tabs">
+                @for (focus of analyticsFocusTabs; track focus.value) {
+                  <button
+                    type="button"
+                    class="sidebar-tab"
+                    [class.active]="isSelectedAnalyticsFocus(focus.value)"
+                    (click)="selectAnalyticsFocus(focus.value)"
+                  >
+                    <strong>{{ focus.label }}</strong>
+                    <small>{{ focus.description }}</small>
+                  </button>
+                }
+              </div>
+            </div>
+
+            <div class="sidebar-block">
+              <span class="sidebar-label">Periodo</span>
+              <div class="sidebar-tabs">
+                @for (period of commercePeriods; track period.value) {
+                  <button
+                    type="button"
+                    class="sidebar-chip"
+                    [class.active]="isSelectedPeriod(period.value)"
+                    (click)="selectCommercePeriod(period.value)"
+                  >
+                    {{ period.label }}
+                  </button>
+                }
+              </div>
+            </div>
+
+            <div class="sidebar-block">
+              <span class="sidebar-label">Mini KPIs</span>
+              <div class="sidebar-mini-grid">
+                @for (card of sidebarMetrics(); track card.label) {
+                  <article class="sidebar-mini-card">
+                    <span>{{ card.label }}</span>
+                    <strong>{{ card.value }}</strong>
+                  </article>
+                }
+              </div>
+            </div>
+
+            <div class="sidebar-note">
+              {{ featuredChartDescription() }}
+            </div>
+          </section>
+        </aside>
+      </div>
+    } @else {
       <section class="panel">
         <div class="panel-header">
           <div>
-            <h2>{{ advancedKpiGroup.title }}</h2>
-            <p>{{ advancedKpiGroup.description }}</p>
+            <h2>Insights rapidos</h2>
+            <p>Lecturas simples sobre tu comportamiento financiero reciente.</p>
           </div>
         </div>
 
-        <div class="stats-grid">
-          @for (card of advancedMetrics(); track card.label) {
-            <article class="stat-card">
-              <span>{{ card.label }}</span>
-              <strong
-                [class.metric-emerald]="card.tone === 'emerald'"
-                [class.metric-rose]="card.tone === 'rose'"
-                [class.metric-amber]="card.tone === 'amber'"
-                [class.metric-slate]="card.tone === 'slate'"
-              >
-                {{ card.value }}
-              </strong>
+        <div class="insights-grid">
+          @for (insight of insightCards(); track insight.title) {
+            <article class="insight-card">
+              <span>{{ insight.title }}</span>
+              <p>{{ insight.text }}</p>
             </article>
           }
         </div>
       </section>
-      <section class="panel">
-        <div class="panel-header">
-          <div>
-            <h2>Evolución de ingresos y salidas</h2>
-            <p>Comparativa diaria de los últimos movimientos cargados.</p>
-          </div>
-        </div>
-        <div class="chart-box chart-box-lg">
-          <highcharts-chart [options]="dailyOptions()" class="chart"></highcharts-chart>
-        </div>
-      </section>
-
-      <section class="panel">
-        <div class="panel-header advanced-header">
-          <div>
-            <h2>Performance de mis comercios</h2>
-            <p>Top comercios con mayor recaudación en {{ periodLabel(commercePeriod()) }}.</p>
-          </div>
-
-          <div class="tabs">
-            @for (period of commercePeriods; track period.value) {
-              <button
-                type="button"
-                class="tab-btn"
-                [class.active]="isSelectedPeriod(period.value)"
-                (click)="selectCommercePeriod(period.value)"
-              >
-                {{ period.label }}
-              </button>
-            }
-          </div>
-        </div>
-
-        @if (commercePerformance().length > 0) {
-          <div class="chart-box chart-box-xl">
-            <highcharts-chart [options]="commerceBarOptions()" class="chart"></highcharts-chart>
-          </div>
-
-          <div class="commerce-grid">
-            @for (commerce of commercePerformance(); track commerce.name; let index = $index) {
-              <article class="commerce-card">
-                <span class="rank">#{{ index + 1 }}</span>
-                <h3>{{ commerce.name }}</h3>
-                <p>{{ commerce.transactions }} transacciones</p>
-                <strong>S/ {{ commerce.totalSoles | number:'1.2-2' }}</strong>
-              </article>
-            }
-          </div>
-        } @else {
-          <div class="empty-state">No hay movimientos de comercios para el periodo seleccionado.</div>
-        }
-      </section>
 
       <section class="panel">
         <div class="panel-header">
           <div>
-            <h2>Distribución QR fijo vs QR abierto</h2>
-            <p>Recaudación recibida por tipo de QR.</p>
+            <h2>Contrapartes frecuentes</h2>
+            <p>Referencias frecuentes de tus transferencias y pagos.</p>
           </div>
         </div>
-        <div class="chart-box chart-box-xl">
-          <highcharts-chart [options]="qrSplitOptions()" class="chart"></highcharts-chart>
+
+        <div class="rows">
+          @for (item of topContrapartes(); track item.nombre) {
+            <div class="row">
+              <span>{{ item.nombre }}</span>
+              <strong>S/ {{ item.montoSoles | number:'1.2-2' }}</strong>
+            </div>
+          }
         </div>
       </section>
     }
-
-    <section class="panel">
-      <div class="panel-header">
-        <div>
-          <h2>Insights rápidos</h2>
-          <p>Lecturas simples sobre tu comportamiento financiero reciente.</p>
-        </div>
-      </div>
-
-      <div class="insights-grid">
-        @for (insight of insightCards(); track insight.title) {
-          <article class="insight-card">
-            <span>{{ insight.title }}</span>
-            <p>{{ insight.text }}</p>
-          </article>
-        }
-      </div>
-    </section>
-
-    <section class="panel">
-      <div class="panel-header">
-        <div>
-          <h2>Contrapartes frecuentes</h2>
-          <p>Referencias frecuentes de tus transferencias y pagos.</p>
-        </div>
-      </div>
-
-      <div class="rows">
-        @for (item of topContrapartes(); track item.nombre) {
-          <div class="row">
-            <span>{{ item.nombre }}</span>
-            <strong>S/ {{ item.montoSoles | number:'1.2-2' }}</strong>
-          </div>
-        }
-      </div>
-    </section>
   }
 </div>

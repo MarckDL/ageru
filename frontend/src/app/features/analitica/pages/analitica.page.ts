@@ -7,6 +7,7 @@ import { AuthService } from '../../../core/auth/auth.service';
 import { environment } from '../../../../environments/environment';
 
 type CommercePeriod = 'DIARIO' | 'MENSUAL' | 'ANUAL';
+type AnalyticsFocus = 'GASTOS' | 'INGRESOS' | 'COMERCIOS' | 'TRANSFERENCIAS' | 'QR';
 
 interface AnaliticaMovimiento {
   id: string;
@@ -86,6 +87,12 @@ interface CommercePeriodTab {
   label: string;
 }
 
+interface AnalyticsFocusTab {
+  value: AnalyticsFocus;
+  label: string;
+  description: string;
+}
+
 interface CommercePerformanceRow {
   name: string;
   totalSoles: number;
@@ -99,6 +106,11 @@ interface KPIGroup {
 }
 
 interface CommerceSplitRow {
+  label: string;
+  totalSoles: number;
+}
+
+interface BreakdownRow {
   label: string;
   totalSoles: number;
 }
@@ -244,6 +256,23 @@ interface CommerceSplitRow {
       margin-bottom: 1rem;
     }
 
+    .analytics-shell {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 320px;
+      gap: 1rem;
+      align-items: start;
+    }
+
+    .analytics-main {
+      min-width: 0;
+    }
+
+    .analytics-sidebar {
+      position: sticky;
+      top: 1rem;
+      align-self: start;
+    }
+
     .chart-box {
       height: 340px;
       width: 100%;
@@ -265,37 +294,6 @@ interface CommerceSplitRow {
 
     .advanced-header {
       align-items: center;
-    }
-
-    .tabs {
-      display: inline-flex;
-      padding: 0.25rem;
-      border-radius: var(--radius-full);
-      background: var(--bg-input);
-      border: 1px solid var(--border-subtle);
-      gap: 0.25rem;
-      flex-wrap: wrap;
-    }
-
-    .tab-btn {
-      border: none;
-      background: transparent;
-      color: var(--text-secondary);
-      border-radius: var(--radius-full);
-      padding: 0.6rem 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all var(--transition-fast);
-    }
-
-    .tab-btn:hover {
-      color: var(--text-primary);
-      background: rgba(255, 255, 255, 0.04);
-    }
-
-    .tab-btn.active {
-      background: var(--primary-500);
-      color: #000000;
     }
 
     .commerce-grid,
@@ -387,6 +385,109 @@ interface CommerceSplitRow {
       background: var(--bg-input);
     }
 
+    .sidebar-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      padding: 1rem;
+    }
+
+    .sidebar-block {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .sidebar-label {
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 700;
+    }
+
+    .sidebar-tabs {
+      display: grid;
+      gap: 0.5rem;
+    }
+
+    .sidebar-tab,
+    .sidebar-chip {
+      width: 100%;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-input);
+      color: var(--text-primary);
+      border-radius: var(--radius-md);
+      padding: 0.7rem 0.85rem;
+      text-align: left;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .sidebar-tab {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .sidebar-tab small {
+      color: var(--text-secondary);
+      font-size: 0.76rem;
+      line-height: 1.3;
+    }
+
+    .sidebar-tab:hover,
+    .sidebar-chip:hover {
+      border-color: rgba(255, 178, 0, 0.28);
+      transform: translateY(-1px);
+    }
+
+    .sidebar-tab.active,
+    .sidebar-chip.active {
+      background: rgba(255, 178, 0, 0.12);
+      border-color: rgba(255, 178, 0, 0.4);
+      box-shadow: inset 0 0 0 1px rgba(255, 178, 0, 0.2);
+    }
+
+    .sidebar-mini-grid {
+      display: grid;
+      gap: 0.6rem;
+    }
+
+    .sidebar-mini-card {
+      padding: 0.8rem 0.85rem;
+      border-radius: var(--radius-md);
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .sidebar-mini-card span {
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 700;
+    }
+
+    .sidebar-mini-card strong {
+      color: var(--text-primary);
+      font-size: 0.95rem;
+      font-weight: 700;
+      word-break: break-word;
+    }
+
+    .sidebar-note {
+      padding: 0.9rem;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, rgba(255, 178, 0, 0.08), rgba(59, 130, 246, 0.05));
+      color: var(--text-secondary);
+      line-height: 1.55;
+      border: 1px solid var(--border-subtle);
+    }
+
     @media (max-width: 960px) {
       .page-hero,
       .panel-header,
@@ -395,8 +496,13 @@ interface CommerceSplitRow {
       }
 
       .stats-grid,
-      .charts-grid {
+      .charts-grid,
+      .analytics-shell {
         grid-template-columns: 1fr;
+      }
+
+      .analytics-sidebar {
+        position: static;
       }
 
       .chart-box,
@@ -415,11 +521,20 @@ export class AnaliticaPage implements OnInit {
   protected readonly resumen = signal<AnaliticaResumen | null>(null);
   protected readonly isAdvancedMode = signal(false);
   protected readonly commercePeriod = signal<CommercePeriod>('MENSUAL');
+  protected readonly analyticsFocus = signal<AnalyticsFocus>('GASTOS');
 
   protected readonly commercePeriods: CommercePeriodTab[] = [
     { value: 'DIARIO', label: 'Diario' },
     { value: 'MENSUAL', label: 'Mensual' },
     { value: 'ANUAL', label: 'Anual' }
+  ];
+
+  protected readonly analyticsFocusTabs: AnalyticsFocusTab[] = [
+    { value: 'GASTOS', label: 'Gastos', description: 'Categorías, días y meses de salida' },
+    { value: 'INGRESOS', label: 'Ingresos', description: 'Canales y recaudación recibida' },
+    { value: 'COMERCIOS', label: 'Comercios', description: 'Top comercios por QR fijo' },
+    { value: 'TRANSFERENCIAS', label: 'Transferencias', description: 'Contrapartes y flujo P2P' },
+    { value: 'QR', label: 'QR', description: 'QR fijo por comercio y comparaci&oacute;n con QR abierto' }
   ];
 
   protected readonly simpleKpiGroup: KPIGroup = {
@@ -452,13 +567,15 @@ export class AnaliticaPage implements OnInit {
     const balance = resumen?.totales?.balanceNetoSoles ?? 0;
     const movimientos = resumen?.totales?.totalTransacciones ?? 0;
     const qrRevenue = this.getReceivedQrRevenue();
+    const averageTicket = this.getAverageTransactionAmount(this.transactions());
 
     return [
       { label: 'Ingresos', value: `S/ ${this.formatMoney(ingresos)}`, tone: 'emerald' },
       { label: 'Salidas', value: `S/ ${this.formatMoney(salidas)}`, tone: 'rose' },
       { label: 'Balance Neto', value: `S/ ${this.formatMoney(balance)}`, tone: balance >= 0 ? 'emerald' : 'rose' },
       { label: 'Total de movimientos', value: String(movimientos), tone: 'amber' },
-      { label: 'Monto recaudado por QR', value: `S/ ${this.formatMoney(qrRevenue)}`, tone: 'emerald' }
+      { label: 'Monto recaudado por QR', value: `S/ ${this.formatMoney(qrRevenue)}`, tone: 'emerald' },
+      { label: 'Ticket promedio', value: `S/ ${this.formatMoney(averageTicket)}`, tone: 'slate' }
     ];
   });
 
@@ -504,8 +621,30 @@ export class AnaliticaPage implements OnInit {
     this.buildCommerceBarOptions(this.commercePerformance(), this.commercePeriod())
   );
 
-  protected readonly qrSplitOptions = computed<HighchartsOptions>(() =>
-    this.buildQrSplitOptions(this.getReceivedQrTransactions())
+  protected readonly featuredChartOptions = computed<HighchartsOptions>(() =>
+    this.buildFocusPrimaryOptions(this.analyticsFocus(), this.commercePeriod())
+  );
+
+  protected readonly featuredChartTitle = computed(() => this.getFocusTitle(this.analyticsFocus(), this.commercePeriod()));
+
+  protected readonly featuredChartDescription = computed(() =>
+    this.getFocusDescription(this.analyticsFocus(), this.commercePeriod())
+  );
+
+  protected readonly sidebarMetrics = computed<MetricCard[]>(() =>
+    this.getSidebarMetrics(this.analyticsFocus(), this.commercePeriod())
+  );
+
+  protected readonly featuredSecondaryOptions = computed<HighchartsOptions>(() =>
+    this.buildFocusSecondaryOptions(this.analyticsFocus(), this.commercePeriod())
+  );
+
+  protected readonly featuredSecondaryTitle = computed(() =>
+    this.getFocusSecondaryTitle(this.analyticsFocus())
+  );
+
+  protected readonly featuredSecondaryDescription = computed(() =>
+    this.getFocusSecondaryDescription(this.analyticsFocus())
   );
 
   protected readonly insightCards = computed<InsightCard[]>(() => {
@@ -559,6 +698,14 @@ export class AnaliticaPage implements OnInit {
     return this.commercePeriod() === period;
   }
 
+  protected selectAnalyticsFocus(focus: AnalyticsFocus): void {
+    this.analyticsFocus.set(focus);
+  }
+
+  protected isSelectedAnalyticsFocus(focus: AnalyticsFocus): boolean {
+    return this.analyticsFocus() === focus;
+  }
+
   protected isCurrencyCard(label: string): boolean {
     return label !== 'Movimientos';
   }
@@ -567,18 +714,12 @@ export class AnaliticaPage implements OnInit {
     return !this.isAdvancedMode();
   }
 
-  private getReceivedQrTransactions(): AnaliticaMovimiento[] {
-    return this.transactions().filter(
-      (item) => item.tipoMovimiento === 'INGRESO' && item.tipo === 'PAGO_QR'
-    );
-  }
-
   private getReceivedQrRevenue(): number {
     return this.getReceivedQrTransactions().reduce((acc, item) => acc + item.montoSoles, 0);
   }
 
-  private getOutgoingTransfers(): AnaliticaMovimiento[] {
-    return this.transactions().filter(
+  private getOutgoingTransfers(transactions: AnaliticaMovimiento[] = this.transactions()): AnaliticaMovimiento[] {
+    return transactions.filter(
       (item) => item.tipoMovimiento === 'SALIDA' && item.tipo === 'TRANSFERENCIA'
     );
   }
@@ -864,7 +1005,7 @@ export class AnaliticaPage implements OnInit {
     period: CommercePeriod
   ): CommercePerformanceRow[] {
     const filtered = this.filterTransactions(transactions, period).filter(
-      (item) => item.tipoMovimiento === 'INGRESO' && item.tipo === 'PAGO_QR'
+      (item) => item.tipoMovimiento === 'INGRESO' && item.tipo === 'PAGO_QR' && item.tipoQr === 'FIJO'
     );
     const grouped = new Map<string, CommercePerformanceRow>();
 
@@ -946,6 +1087,692 @@ export class AnaliticaPage implements OnInit {
           type: 'pie',
           name: 'QR',
           data: data.map((item) => ({ name: item.label, y: item.totalSoles }))
+        }
+      ]
+    } as HighchartsOptions;
+  }
+
+  private buildFocusPrimaryOptions(focus: AnalyticsFocus, period: CommercePeriod): HighchartsOptions {
+    const periodTransactions = this.filterTransactions(this.transactions(), period);
+
+    switch (focus) {
+      case 'INGRESOS':
+        return this.buildIncomeChannelOptions(periodTransactions);
+      case 'COMERCIOS':
+        return this.buildCommerceBarOptions(this.buildCommercePerformance(periodTransactions, period), period);
+      case 'TRANSFERENCIAS':
+        return this.buildTopCounterpartOptions(this.getTopCounterpartRows(periodTransactions));
+      case 'QR':
+        return this.buildQrCommerceOptions(periodTransactions);
+      case 'GASTOS':
+      default:
+        return this.buildExpensePeriodOptions(periodTransactions, period);
+    }
+  }
+
+  private getSidebarMetrics(focus: AnalyticsFocus, period: CommercePeriod): MetricCard[] {
+    const periodTransactions = this.filterTransactions(this.transactions(), period);
+    switch (focus) {
+      case 'INGRESOS':
+        return [
+          { label: 'Ingresos por comercio', value: `S/ ${this.formatMoney(this.getReceivedCommerceRevenue(periodTransactions))}`, tone: 'emerald' },
+          { label: 'QR abierto', value: `S/ ${this.formatMoney(this.getReceivedOpenQrRevenue(periodTransactions))}`, tone: 'slate' },
+          { label: 'Transferencias recibidas', value: `S/ ${this.formatMoney(this.getReceivedTransfers(periodTransactions).reduce((acc, item) => acc + item.montoSoles, 0))}`, tone: 'slate' }
+        ];
+      case 'COMERCIOS': {
+        const topCommerce = this.getTopCommerceRows(periodTransactions)[0] ?? { name: 'Sin datos', totalSoles: 0, transactions: 0 };
+        return [
+          { label: 'Comercios activos', value: String(this.getTopCommerceRows(periodTransactions).length), tone: 'slate' },
+          { label: 'Top comercio', value: topCommerce.name, tone: 'emerald' },
+          { label: 'Top recaudación', value: `S/ ${this.formatMoney(topCommerce.totalSoles)}`, tone: 'emerald' }
+        ];
+      }
+      case 'TRANSFERENCIAS': {
+        const received = this.getReceivedTransfers(periodTransactions);
+        const sent = this.getOutgoingTransfers(periodTransactions);
+        const topCounterpart = this.getTopCounterpartRows(periodTransactions)[0] ?? { nombre: 'Sin datos', cantidad: 0, montoSoles: 0 };
+        return [
+          { label: 'Enviadas', value: String(sent.length), tone: 'rose' },
+          { label: 'Recibidas', value: String(received.length), tone: 'emerald' },
+          { label: 'Top contraparte', value: topCounterpart.nombre, tone: 'slate' }
+        ];
+      }
+      case 'QR':
+        return [
+          { label: 'QR fijo', value: `S/ ${this.formatMoney(this.getReceivedCommerceRevenue(periodTransactions))}`, tone: 'emerald' },
+          { label: 'QR abierto', value: `S/ ${this.formatMoney(this.getReceivedOpenQrRevenue(periodTransactions))}`, tone: 'slate' },
+          { label: 'Pagos QR', value: String(this.getReceivedQrTransactions(periodTransactions).length), tone: 'amber' }
+        ];
+      case 'GASTOS':
+      default: {
+        const expenseRows = this.groupExpenseCategories(periodTransactions);
+        const dominant = expenseRows[0];
+        const day = this.resumen()?.insights?.diaMayorGasto?.dia ?? 'Sin datos';
+        const totalExpenses = periodTransactions
+          .filter((item) => item.tipoMovimiento === 'SALIDA')
+          .reduce((acc, item) => acc + item.montoSoles, 0);
+
+        return [
+          { label: 'Salidas del periodo', value: `S/ ${this.formatMoney(totalExpenses)}`, tone: 'rose' },
+          { label: 'Categoría dominante', value: dominant?.name ?? 'Sin categoría', tone: 'slate' },
+          { label: 'Día de mayor gasto', value: day, tone: 'amber' }
+        ];
+      }
+    }
+  }
+
+  private buildFocusSecondaryOptions(focus: AnalyticsFocus, period: CommercePeriod): HighchartsOptions {
+    const periodTransactions = this.filterTransactions(this.transactions(), period);
+
+    switch (focus) {
+      case 'INGRESOS':
+        return this.buildQrCommerceOptions(periodTransactions);
+      case 'COMERCIOS':
+        return this.buildIncomeChannelOptions(periodTransactions);
+      case 'TRANSFERENCIAS':
+        return this.buildTransferFlowOptions(periodTransactions);
+      case 'QR':
+        return this.buildQrSplitOptions(this.getReceivedQrTransactions(periodTransactions));
+      case 'GASTOS':
+      default:
+        return this.buildExpenseDonutOptions(periodTransactions);
+    }
+  }
+
+  private getFocusTitle(focus: AnalyticsFocus, period: CommercePeriod): string {
+    switch (focus) {
+      case 'INGRESOS':
+        return 'Recaudaci\u00f3n por canal';
+      case 'COMERCIOS':
+        return 'Top comercios con mayor recaudaci\u00f3n';
+      case 'TRANSFERENCIAS':
+        return 'Top contrapartes frecuentes';
+      case 'QR':
+        return 'QR fijo por comercio';
+      case 'GASTOS':
+      default:
+        if (period === 'DIARIO') return 'Gasto por d\u00eda de la semana';
+        if (period === 'ANUAL') return 'Gasto anual por mes';
+        return 'Gasto por mes';
+    }
+  }
+
+  private getFocusDescription(focus: AnalyticsFocus, period: CommercePeriod): string {
+    switch (focus) {
+      case 'INGRESOS':
+        return 'Agrupa la recaudaci\u00f3n total entre comercios, QR abierto y transferencias recibidas.';
+      case 'COMERCIOS':
+        return 'Muestra s\u00f3lo comercios con QR fijo y cu\u00e1nto recauda cada uno.';
+      case 'TRANSFERENCIAS':
+        return 'Ordena las contrapartes que m\u00e1s mueven dinero contigo.';
+      case 'QR':
+        return 'Agrupa el QR fijo por comercio para ver qui\u00e9n recauda m\u00e1s.';
+      case 'GASTOS':
+      default:
+        if (period === 'DIARIO') return 'Salidas acumuladas por d\u00eda de la semana para ver tendencias semanales.';
+        if (period === 'ANUAL') return 'Comparativa anual mes a mes para detectar en qu\u00e9 periodo gastas m\u00e1s.';
+        return 'Compara tus salidas mes a mes para detectar en qu\u00e9 periodo gastas m\u00e1s.';
+    }
+  }
+
+  private getFocusSecondaryTitle(focus: AnalyticsFocus): string {
+    switch (focus) {
+      case 'INGRESOS':
+        return 'QR fijo por comercio';
+      case 'COMERCIOS':
+        return 'Recaudación por canal';
+      case 'TRANSFERENCIAS':
+        return 'Flujo P2P';
+      case 'QR':
+        return 'QR fijo vs QR abierto';
+      case 'GASTOS':
+      default:
+        return 'Dona de gastos por categoría';
+    }
+  }
+
+  private getFocusSecondaryDescription(focus: AnalyticsFocus): string {
+    switch (focus) {
+      case 'INGRESOS':
+        return 'Desglose del QR fijo por comercio.';
+      case 'COMERCIOS':
+        return 'Cómo se compone la recaudación entre comercio, QR abierto y transferencias.';
+      case 'TRANSFERENCIAS':
+        return 'Comparación del dinero enviado y recibido.';
+      case 'QR':
+        return 'Separación entre QR fijo y QR abierto.';
+      case 'GASTOS':
+      default:
+        return 'Clasificación de las salidas por tipo y categoría.';
+    }
+  }
+
+  private getTopCommerce(): CommercePerformanceRow {
+    return this.commercePerformance()[0] ?? { name: 'Sin datos', totalSoles: 0, transactions: 0 };
+  }
+
+  private getTopCounterpart(): { nombre: string; cantidad: number; montoSoles: number } {
+    return this.topContrapartes()[0] ?? { nombre: 'Sin datos', cantidad: 0, montoSoles: 0 };
+  }
+
+  private getTopCommerceRows(transactions: AnaliticaMovimiento[]): CommercePerformanceRow[] {
+    return this.buildCommercePerformance(transactions, 'MENSUAL');
+  }
+
+  private getTopCounterpartRows(transactions: AnaliticaMovimiento[]): Array<{ nombre: string; cantidad: number; montoSoles: number }> {
+    const grouped = new Map<string, { nombre: string; cantidad: number; montoSoles: number }>();
+
+    for (const item of transactions) {
+      if (item.tipoMovimiento !== 'INGRESO' && item.tipoMovimiento !== 'SALIDA') continue;
+
+      const name = this.normalizeLabel(item.contraparteNombre) ?? 'Sin datos';
+      const current = grouped.get(name) ?? { nombre: name, cantidad: 0, montoSoles: 0 };
+      current.cantidad += 1;
+      current.montoSoles += item.montoSoles;
+      grouped.set(name, current);
+    }
+
+    return [...grouped.values()].sort((a, b) => b.montoSoles - a.montoSoles);
+  }
+
+  private getReceivedQrTransactions(transactions: AnaliticaMovimiento[] = this.transactions()): AnaliticaMovimiento[] {
+    return transactions.filter(
+      (item) => item.tipoMovimiento === 'INGRESO' && item.tipo === 'PAGO_QR'
+    );
+  }
+
+  private getReceivedCommerceTransactions(transactions: AnaliticaMovimiento[] = this.transactions()): AnaliticaMovimiento[] {
+    return this.getReceivedQrTransactions(transactions).filter((item) => item.tipoQr === 'FIJO');
+  }
+
+  private getReceivedOpenQrTransactions(transactions: AnaliticaMovimiento[] = this.transactions()): AnaliticaMovimiento[] {
+    return this.getReceivedQrTransactions(transactions).filter((item) => item.tipoQr !== 'FIJO');
+  }
+
+  private getReceivedCommerceRevenue(transactions: AnaliticaMovimiento[] = this.transactions()): number {
+    return this.getReceivedCommerceTransactions(transactions).reduce((acc, item) => acc + item.montoSoles, 0);
+  }
+
+  private getReceivedOpenQrRevenue(transactions: AnaliticaMovimiento[] = this.transactions()): number {
+    return this.getReceivedOpenQrTransactions(transactions).reduce((acc, item) => acc + item.montoSoles, 0);
+  }
+
+  private getReceivedTransfers(transactions: AnaliticaMovimiento[] = this.transactions()): AnaliticaMovimiento[] {
+    return transactions.filter(
+      (item) => item.tipoMovimiento === 'INGRESO' && item.tipo === 'TRANSFERENCIA'
+    );
+  }
+
+  private getIncomeChannelRows(transactions: AnaliticaMovimiento[] = this.transactions()): BreakdownRow[] {
+    return [
+      { label: 'Comercios QR fijo', totalSoles: this.getReceivedCommerceRevenue(transactions) },
+      { label: 'QR abierto', totalSoles: this.getReceivedOpenQrRevenue(transactions) },
+      { label: 'Transferencias recibidas', totalSoles: this.getReceivedTransfers(transactions).reduce((acc, item) => acc + item.montoSoles, 0) }
+    ].filter((item) => item.totalSoles > 0);
+  }
+
+  private getWeeklyExpenseRows(transactions: AnaliticaMovimiento[] = this.filterTransactions(this.transactions(), 'MENSUAL')): BreakdownRow[] {
+    const order = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+    const grouped = new Map<string, number>(order.map((day) => [day, 0]));
+
+    for (const transaction of transactions) {
+      if (transaction.tipoMovimiento !== 'SALIDA') continue;
+
+      const day = new Date(transaction.createdAt).getDay();
+      const label = order[(day + 6) % 7];
+      grouped.set(label, (grouped.get(label) ?? 0) + transaction.montoSoles);
+    }
+
+    return order.map((label) => ({ label, totalSoles: grouped.get(label) ?? 0 }));
+  }
+
+  private getMonthlyExpenseRows(): BreakdownRow[] {
+    return (this.resumen()?.historicoMensual ?? []).map((item) => ({
+      label: this.formatMonthLabel(item.mes),
+      totalSoles: item.salidasSoles
+    }));
+  }
+
+  private buildExpensePeriodOptions(
+    transactions: AnaliticaMovimiento[],
+    period: CommercePeriod
+  ): HighchartsOptions {
+    if (period === 'DIARIO') {
+      return this.buildExpenseWeekdayOptions(transactions);
+    }
+
+    const rows = this.getMonthlyExpenseRows();
+    return {
+      chart: {
+        type: 'column',
+        backgroundColor: 'transparent',
+        style: { fontFamily: 'Inter, sans-serif' }
+      },
+      title: {
+        text: period === 'ANUAL' ? 'Gasto anual por mes' : 'Gasto por mes',
+        style: { color: '#f8fafc', fontWeight: '700' }
+      },
+      subtitle: {
+        text: period === 'ANUAL' ? 'Comparativa mensual del año' : 'Salidas acumuladas por mes',
+        style: { color: '#94a3b8' }
+      },
+      credits: { enabled: false },
+      legend: { enabled: false },
+      colors: ['#fb7185'],
+      xAxis: {
+        categories: rows.map((item) => item.label),
+        labels: { style: { color: '#cbd5e1', fontWeight: '600' } },
+        lineColor: 'rgba(255,255,255,.14)'
+      },
+      yAxis: {
+        title: { text: 'Soles', style: { color: '#94a3b8' } },
+        labels: { style: { color: '#94a3b8' } },
+        gridLineColor: 'rgba(255,255,255,.08)'
+      },
+      tooltip: {
+        backgroundColor: 'rgba(15, 23, 42, 0.96)',
+        borderColor: 'rgba(255,255,255,.12)',
+        style: { color: '#e2e8f0' },
+        pointFormat: '<b>S/ {point.y:,.2f}</b>'
+      },
+      plotOptions: {
+        column: {
+          borderWidth: 0,
+          borderRadius: 8,
+          pointPadding: 0.08,
+          groupPadding: 0.14,
+          dataLabels: {
+            enabled: true,
+            style: {
+              color: '#f8fafc',
+              textOutline: 'none',
+              fontWeight: '600'
+            }
+          }
+        }
+      },
+      series: [
+        {
+          type: 'column',
+          name: 'Gastos',
+          data: rows.map((item) => item.totalSoles)
+        }
+      ]
+    } as HighchartsOptions;
+  }
+
+  private buildTransferFlowOptions(transactions: AnaliticaMovimiento[]): HighchartsOptions {
+    const sent = this.getOutgoingTransfers(transactions).reduce((acc, item) => acc + item.montoSoles, 0);
+    const received = this.getReceivedTransfers(transactions).reduce((acc, item) => acc + item.montoSoles, 0);
+    const data = [
+      { name: 'Enviadas', y: sent },
+      { name: 'Recibidas', y: received }
+    ].filter((item) => item.y > 0);
+
+    return {
+      chart: {
+        type: 'pie',
+        backgroundColor: 'transparent',
+        style: { fontFamily: 'Inter, sans-serif' }
+      },
+      title: {
+        text: 'Flujo P2P',
+        style: { color: '#f8fafc', fontWeight: '700' }
+      },
+      subtitle: {
+        text: 'Dinero enviado y recibido',
+        style: { color: '#94a3b8' }
+      },
+      credits: { enabled: false },
+      colors: ['#fb7185', '#22c55e'],
+      legend: { itemStyle: { color: '#cbd5e1' } },
+      tooltip: {
+        backgroundColor: 'rgba(15, 23, 42, 0.96)',
+        borderColor: 'rgba(255,255,255,.12)',
+        style: { color: '#e2e8f0' },
+        pointFormat: '<b>S/ {point.y:,.2f}</b> ({point.percentage:.1f}%)'
+      },
+      plotOptions: {
+        pie: {
+          innerSize: '60%',
+          borderWidth: 0,
+          dataLabels: {
+            enabled: true,
+            distance: 14,
+            style: {
+              color: '#e2e8f0',
+              textOutline: 'none',
+              fontWeight: '600'
+            }
+          }
+        }
+      },
+      series: [
+        {
+          type: 'pie',
+          name: 'Transferencias',
+          data
+        }
+      ]
+    } as HighchartsOptions;
+  }
+
+  private buildExpenseMonthlyOptions(transactions: AnaliticaMovimiento[] = this.transactions()): HighchartsOptions {
+    const rows = this.getMonthlyExpenseRows();
+
+    return {
+      chart: {
+        type: 'column',
+        backgroundColor: 'transparent',
+        style: { fontFamily: 'Inter, sans-serif' }
+      },
+      title: {
+        text: 'Gasto por mes',
+        style: { color: '#f8fafc', fontWeight: '700' }
+      },
+      subtitle: {
+        text: 'Salidas acumuladas por mes',
+        style: { color: '#94a3b8' }
+      },
+      credits: { enabled: false },
+      legend: { enabled: false },
+      colors: ['#fb7185'],
+      xAxis: {
+        categories: rows.map((item) => item.label),
+        labels: { style: { color: '#cbd5e1', fontWeight: '600' } },
+        lineColor: 'rgba(255,255,255,.14)'
+      },
+      yAxis: {
+        title: { text: 'Soles', style: { color: '#94a3b8' } },
+        labels: { style: { color: '#94a3b8' } },
+        gridLineColor: 'rgba(255,255,255,.08)'
+      },
+      tooltip: {
+        backgroundColor: 'rgba(15, 23, 42, 0.96)',
+        borderColor: 'rgba(255,255,255,.12)',
+        style: { color: '#e2e8f0' },
+        pointFormat: '<b>S/ {point.y:,.2f}</b>'
+      },
+      plotOptions: {
+        column: {
+          borderWidth: 0,
+          borderRadius: 8,
+          pointPadding: 0.08,
+          groupPadding: 0.14,
+          dataLabels: {
+            enabled: true,
+            style: {
+              color: '#f8fafc',
+              textOutline: 'none',
+              fontWeight: '600'
+            }
+          }
+        }
+      },
+      series: [
+        {
+          type: 'column',
+          name: 'Gastos',
+          data: rows.map((item) => item.totalSoles)
+        }
+      ]
+    } as HighchartsOptions;
+  }
+
+  private getReceivedQrCommerceRows(transactions: AnaliticaMovimiento[] = this.transactions()): BreakdownRow[] {
+    const grouped = new Map<string, number>();
+
+    for (const item of transactions) {
+      if (item.tipoMovimiento !== 'INGRESO' || item.tipo !== 'PAGO_QR' || item.tipoQr !== 'FIJO') {
+        continue;
+      }
+
+      const commerceName =
+        this.normalizeLabel(item.comercioNombre) ??
+        this.normalizeLabel(item.comercioCategoria) ??
+        'Comercio';
+      grouped.set(commerceName, (grouped.get(commerceName) ?? 0) + item.montoSoles);
+    }
+
+    return [...grouped.entries()]
+      .map(([label, totalSoles]) => ({ label, totalSoles }))
+      .sort((a, b) => b.totalSoles - a.totalSoles);
+  }
+
+  private buildQrCommerceOptions(transactions: AnaliticaMovimiento[]): HighchartsOptions {
+    const grouped = this.getReceivedQrCommerceRows(transactions).slice(0, 8);
+
+    return {
+      chart: {
+        type: 'bar',
+        backgroundColor: 'transparent',
+        style: { fontFamily: 'Inter, sans-serif' }
+      },
+      title: {
+        text: 'QR fijo por comercio',
+        style: { color: '#f8fafc', fontWeight: '700' }
+      },
+      subtitle: {
+        text: 'Sólo pagos QR con comercio asociado',
+        style: { color: '#94a3b8' }
+      },
+      credits: { enabled: false },
+      legend: { enabled: false },
+      colors: ['#22c55e', '#38bdf8', '#a78bfa', '#f97316', '#f59e0b', '#14b8a6', '#fb7185'],
+      xAxis: {
+        categories: grouped.map((item) => item.label),
+        labels: { style: { color: '#cbd5e1', fontWeight: '600' } },
+        lineColor: 'rgba(255,255,255,.14)'
+      },
+      yAxis: {
+        title: { text: 'Soles', style: { color: '#94a3b8' } },
+        labels: { style: { color: '#94a3b8' } },
+        gridLineColor: 'rgba(255,255,255,.08)'
+      },
+      tooltip: {
+        backgroundColor: 'rgba(15, 23, 42, 0.96)',
+        borderColor: 'rgba(255,255,255,.12)',
+        style: { color: '#e2e8f0' },
+        pointFormat: '<b>S/ {point.y:,.2f}</b>'
+      },
+      plotOptions: {
+        bar: {
+          borderWidth: 0,
+          borderRadius: 6,
+          pointPadding: 0.12,
+          groupPadding: 0.08,
+          dataLabels: {
+            enabled: true,
+            style: {
+              color: '#f8fafc',
+              textOutline: 'none',
+              fontWeight: '600'
+            }
+          }
+        }
+      },
+      series: [
+        {
+          type: 'bar',
+          name: 'Recaudación',
+          colorByPoint: true,
+          data: grouped.map((item) => item.totalSoles)
+        }
+      ]
+    } as HighchartsOptions;
+  }
+
+  private buildIncomeChannelOptions(transactions: AnaliticaMovimiento[]): HighchartsOptions {
+    const rows = this.getIncomeChannelRows(transactions);
+
+    return {
+      chart: {
+        type: 'pie',
+        backgroundColor: 'transparent',
+        style: { fontFamily: 'Inter, sans-serif' }
+      },
+      title: {
+        text: 'Recaudación por canal',
+        style: { color: '#f8fafc', fontWeight: '700' }
+      },
+      subtitle: {
+        text: 'Comercios, QR abierto y transferencias',
+        style: { color: '#94a3b8' }
+      },
+      credits: { enabled: false },
+      colors: ['#22c55e', '#38bdf8', '#fb7185'],
+      legend: { itemStyle: { color: '#cbd5e1' } },
+      tooltip: {
+        backgroundColor: 'rgba(15, 23, 42, 0.96)',
+        borderColor: 'rgba(255,255,255,.12)',
+        style: { color: '#e2e8f0' },
+        pointFormat: '<b>S/ {point.y:,.2f}</b> ({point.percentage:.1f}%)'
+      },
+      plotOptions: {
+        pie: {
+          innerSize: '60%',
+          borderWidth: 0,
+          dataLabels: {
+            enabled: true,
+            distance: 14,
+            style: {
+              color: '#e2e8f0',
+              textOutline: 'none',
+              fontWeight: '600'
+            }
+          }
+        }
+      },
+      series: [
+        {
+          type: 'pie',
+          name: 'Ingresos',
+          data: rows.map((item) => ({ name: item.label, y: item.totalSoles }))
+        }
+      ]
+    } as HighchartsOptions;
+  }
+
+  private buildExpenseWeekdayOptions(transactions: AnaliticaMovimiento[]): HighchartsOptions {
+    const rows = this.getWeeklyExpenseRows(transactions);
+
+    return {
+      chart: {
+        type: 'bar',
+        backgroundColor: 'transparent',
+        style: { fontFamily: 'Inter, sans-serif' }
+      },
+      title: {
+        text: 'Gasto por día de la semana',
+        style: { color: '#f8fafc', fontWeight: '700' }
+      },
+      subtitle: {
+        text: 'Salidas acumuladas del mes actual',
+        style: { color: '#94a3b8' }
+      },
+      credits: { enabled: false },
+      legend: { enabled: false },
+      colors: ['#fb7185'],
+      xAxis: {
+        categories: rows.map((item) => item.label),
+        labels: { style: { color: '#cbd5e1', fontWeight: '600' } },
+        lineColor: 'rgba(255,255,255,.14)'
+      },
+      yAxis: {
+        title: { text: 'Soles', style: { color: '#94a3b8' } },
+        labels: { style: { color: '#94a3b8' } },
+        gridLineColor: 'rgba(255,255,255,.08)'
+      },
+      tooltip: {
+        backgroundColor: 'rgba(15, 23, 42, 0.96)',
+        borderColor: 'rgba(255,255,255,.12)',
+        style: { color: '#e2e8f0' },
+        pointFormat: '<b>S/ {point.y:,.2f}</b>'
+      },
+      plotOptions: {
+        bar: {
+          borderWidth: 0,
+          borderRadius: 6,
+          pointPadding: 0.12,
+          groupPadding: 0.08,
+          dataLabels: {
+            enabled: true,
+            style: {
+              color: '#f8fafc',
+              textOutline: 'none',
+              fontWeight: '600'
+            }
+          }
+        }
+      },
+      series: [
+        {
+          type: 'bar',
+          name: 'Gastos',
+          data: rows.map((item) => item.totalSoles)
+        }
+      ]
+    } as HighchartsOptions;
+  }
+
+  private buildTopCounterpartOptions(rows: Array<{ nombre: string; cantidad: number; montoSoles: number }>): HighchartsOptions {
+    const topRows = rows.slice(0, 8);
+
+    return {
+      chart: {
+        type: 'bar',
+        backgroundColor: 'transparent',
+        style: { fontFamily: 'Inter, sans-serif' }
+      },
+      title: {
+        text: 'Top contrapartes frecuentes',
+        style: { color: '#f8fafc', fontWeight: '700' }
+      },
+      subtitle: {
+        text: 'Transferencias y pagos más repetidos',
+        style: { color: '#94a3b8' }
+      },
+      credits: { enabled: false },
+      legend: { enabled: false },
+      colors: ['#38bdf8', '#22c55e', '#f97316', '#a78bfa', '#f59e0b'],
+      xAxis: {
+        categories: topRows.map((item) => item.nombre),
+        labels: { style: { color: '#cbd5e1', fontWeight: '600' } },
+        lineColor: 'rgba(255,255,255,.14)'
+      },
+      yAxis: {
+        title: { text: 'Soles', style: { color: '#94a3b8' } },
+        labels: { style: { color: '#94a3b8' } },
+        gridLineColor: 'rgba(255,255,255,.08)'
+      },
+      tooltip: {
+        backgroundColor: 'rgba(15, 23, 42, 0.96)',
+        borderColor: 'rgba(255,255,255,.12)',
+        style: { color: '#e2e8f0' },
+        pointFormat: '<b>S/ {point.y:,.2f}</b>'
+      },
+      plotOptions: {
+        bar: {
+          borderWidth: 0,
+          borderRadius: 6,
+          pointPadding: 0.12,
+          groupPadding: 0.08,
+          dataLabels: {
+            enabled: true,
+            style: {
+              color: '#f8fafc',
+              textOutline: 'none',
+              fontWeight: '600'
+            }
+          }
+        }
+      },
+      series: [
+        {
+          type: 'bar',
+          name: 'Monto',
+          colorByPoint: true,
+          data: topRows.map((item) => item.montoSoles)
         }
       ]
     } as HighchartsOptions;
