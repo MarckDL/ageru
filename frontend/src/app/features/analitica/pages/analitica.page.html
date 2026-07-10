@@ -1,0 +1,195 @@
+<div class="analitica-page">
+  <div class="page-hero">
+    <div>
+      <p class="eyebrow">Ageru Analytics</p>
+      <h1 class="page-title">Analítica</h1>
+      <p class="page-subtitle">Resumen visual de ingresos, salidas y comportamiento transaccional.</p>
+    </div>
+
+    <button type="button" class="toggle-advanced-btn" (click)="toggleAdvancedMode()">
+      {{ isAdvancedMode() ? 'Salir de modo avanzado' : 'Entrar a modo avanzado' }}
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="loading">Cargando analítica...</div>
+  } @else {
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <h2>{{ simpleKpiGroup.title }}</h2>
+          <p>{{ simpleKpiGroup.description }}</p>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        @for (card of simpleMetrics(); track card.label) {
+          <article class="stat-card">
+            <span>{{ card.label }}</span>
+            <strong
+              [class.metric-emerald]="card.tone === 'emerald'"
+              [class.metric-rose]="card.tone === 'rose'"
+              [class.metric-amber]="card.tone === 'amber'"
+              [class.metric-slate]="card.tone === 'slate'"
+            >
+              {{ card.value }}
+            </strong>
+          </article>
+        }
+      </div>
+    </section>
+
+    <section class="charts-grid">
+      <article class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>Histórico mensual</h2>
+            <p>Ingresos y salidas por mes en barras comparativas.</p>
+          </div>
+        </div>
+        <div class="chart-box chart-box-lg">
+          <highcharts-chart [options]="monthlyOptions()" class="chart"></highcharts-chart>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>Dona de gastos por categoría</h2>
+            <p>Clasificación de salidas reales según tipo y categoría asociada.</p>
+          </div>
+        </div>
+        <div class="chart-box">
+          <highcharts-chart [options]="expenseDonutOptions()" class="chart"></highcharts-chart>
+        </div>
+      </article>
+    </section>
+
+    @if (isAdvancedMode()) {
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>{{ advancedKpiGroup.title }}</h2>
+            <p>{{ advancedKpiGroup.description }}</p>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          @for (card of advancedMetrics(); track card.label) {
+            <article class="stat-card">
+              <span>{{ card.label }}</span>
+              <strong
+                [class.metric-emerald]="card.tone === 'emerald'"
+                [class.metric-rose]="card.tone === 'rose'"
+                [class.metric-amber]="card.tone === 'amber'"
+                [class.metric-slate]="card.tone === 'slate'"
+              >
+                {{ card.value }}
+              </strong>
+            </article>
+          }
+        </div>
+      </section>
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>Evolución de ingresos y salidas</h2>
+            <p>Comparativa diaria de los últimos movimientos cargados.</p>
+          </div>
+        </div>
+        <div class="chart-box chart-box-lg">
+          <highcharts-chart [options]="dailyOptions()" class="chart"></highcharts-chart>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header advanced-header">
+          <div>
+            <h2>Performance de mis comercios</h2>
+            <p>Top comercios con mayor recaudación en {{ periodLabel(commercePeriod()) }}.</p>
+          </div>
+
+          <div class="tabs">
+            @for (period of commercePeriods; track period.value) {
+              <button
+                type="button"
+                class="tab-btn"
+                [class.active]="isSelectedPeriod(period.value)"
+                (click)="selectCommercePeriod(period.value)"
+              >
+                {{ period.label }}
+              </button>
+            }
+          </div>
+        </div>
+
+        @if (commercePerformance().length > 0) {
+          <div class="chart-box chart-box-xl">
+            <highcharts-chart [options]="commerceBarOptions()" class="chart"></highcharts-chart>
+          </div>
+
+          <div class="commerce-grid">
+            @for (commerce of commercePerformance(); track commerce.name; let index = $index) {
+              <article class="commerce-card">
+                <span class="rank">#{{ index + 1 }}</span>
+                <h3>{{ commerce.name }}</h3>
+                <p>{{ commerce.transactions }} transacciones</p>
+                <strong>S/ {{ commerce.totalSoles | number:'1.2-2' }}</strong>
+              </article>
+            }
+          </div>
+        } @else {
+          <div class="empty-state">No hay movimientos de comercios para el periodo seleccionado.</div>
+        }
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>Distribución QR fijo vs QR abierto</h2>
+            <p>Recaudación recibida por tipo de QR.</p>
+          </div>
+        </div>
+        <div class="chart-box chart-box-xl">
+          <highcharts-chart [options]="qrSplitOptions()" class="chart"></highcharts-chart>
+        </div>
+      </section>
+    }
+
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <h2>Insights rápidos</h2>
+          <p>Lecturas simples sobre tu comportamiento financiero reciente.</p>
+        </div>
+      </div>
+
+      <div class="insights-grid">
+        @for (insight of insightCards(); track insight.title) {
+          <article class="insight-card">
+            <span>{{ insight.title }}</span>
+            <p>{{ insight.text }}</p>
+          </article>
+        }
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <h2>Contrapartes frecuentes</h2>
+          <p>Referencias frecuentes de tus transferencias y pagos.</p>
+        </div>
+      </div>
+
+      <div class="rows">
+        @for (item of topContrapartes(); track item.nombre) {
+          <div class="row">
+            <span>{{ item.nombre }}</span>
+            <strong>S/ {{ item.montoSoles | number:'1.2-2' }}</strong>
+          </div>
+        }
+      </div>
+    </section>
+  }
+</div>
