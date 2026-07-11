@@ -1,5 +1,7 @@
 const comerciosRepository = require('./comercios.repository');
 const cuentasRepository = require('../cuentas/cuentas.repository');
+const { getConnection, sql } = require('../../config/db');
+const crypto = require('crypto');
 
 const isRucValid = (ruc) => /^\d{11}$/.test(String(ruc || ''));
 
@@ -17,16 +19,70 @@ const crear = async (usuarioId, payload) => {
   const cuenta = await cuentasRepository.findCuentaPrincipal(usuarioId);
   if (!cuenta) return { notFound: true, message: 'Cuenta de abono no encontrada' };
 
-  return comerciosRepository.create({
-    usuarioId,
-    cuentaAbonoId: cuenta.id,
-    ruc: payload.ruc,
-    razonSocial: payload.razonSocial,
-    nombreComercial: payload.nombreComercial,
-    categoria: payload.categoria,
-    direccionFiscal: payload.direccionFiscal,
-    telefonoContacto: payload.telefonoContacto
-  });
+  const pool = await getConnection();
+  const tx = new sql.Transaction(pool);
+  await tx.begin();
+
+  try {
+    const cuentaAbonoId = crypto.randomUUID();
+    const numeroCuenta = `***${crypto.randomBytes(2).toString('hex').toUpperCase()}`;
+    const limiteDiarioCentavos = Number(cuenta.limite_diario_centavos ?? 50000);
+
+    await new sql.Request(tx)
+      .input('id', sql.UniqueIdentifier, cuentaAbonoId)
+      .input('usuarioId', sql.UniqueIdentifier, usuarioId)
+      .input('bancoId', sql.UniqueIdentifier, cuenta.banco_id)
+      .input('numeroCuenta', sql.VarChar(20), numeroCuenta)
+      .input('saldoCentavos', sql.BigInt, 0)
+      .input('limiteDiarioCentavos', sql.BigInt, limiteDiarioCentavos)
+      .query(`
+        INSERT INTO cuentas (
+          id,
+          usuario_id,
+          banco_id,
+          numero_cuenta_enmascarado,
+          saldo_centavos,
+          limite_diario_centavos,
+          estado
+        )
+        VALUES (
+          @id,
+          @usuarioId,
+          @bancoId,
+          @numeroCuenta,
+          @saldoCentavos,
+          @limiteDiarioCentavos,
+          'ACTIVA'
+        )
+      `);
+
+    const comercioInsert = await new sql.Request(tx)
+      .input('usuarioId', sql.UniqueIdentifier, usuarioId)
+      .input('cuentaAbonoId', sql.UniqueIdentifier, cuentaAbonoId)
+      .input('ruc', sql.Char(11), payload.ruc)
+      .input('razonSocial', sql.VarChar(200), payload.razonSocial)
+      .input('nombreComercial', sql.VarChar(150), payload.nombreComercial || null)
+      .input('categoria', sql.VarChar(60), payload.categoria)
+      .input('direccionFiscal', sql.VarChar(255), payload.direccionFiscal || null)
+      .input('telefonoContacto', sql.VarChar(15), payload.telefonoContacto || null)
+      .query(`
+        INSERT INTO comercios (
+          usuario_id, cuenta_abono_id, ruc, razon_social, nombre_comercial,
+          categoria, direccion_fiscal, telefono_contacto, estado
+        )
+        OUTPUT inserted.*
+        VALUES (
+          @usuarioId, @cuentaAbonoId, @ruc, @razonSocial, @nombreComercial,
+          @categoria, @direccionFiscal, @telefonoContacto, 'ACTIVO'
+        )
+      `);
+
+    await tx.commit();
+    return comercioInsert.recordset[0];
+  } catch (error) {
+    await tx.rollback();
+    throw error;
+  }
 };
 
 const listar = (usuarioId) => comerciosRepository.listByUsuario(usuarioId);

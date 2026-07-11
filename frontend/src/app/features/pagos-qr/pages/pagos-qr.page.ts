@@ -49,7 +49,13 @@ import { environment } from '../../../../environments/environment';
 
           <div class="qr-result" *ngIf="qrGenerado()">
             <img [src]="qrGenerado()?.qrImageDataUrl" alt="Codigo QR generado" />
-            <div class="qr-code">{{ qrGenerado()?.codigo_qr }}</div>
+            <div class="qr-code-row">
+              <div class="qr-code">{{ qrGenerado()?.codigo_qr }}</div>
+              <button type="button" class="btn-copy" (click)="copiarCodigo(qrGenerado()?.codigo_qr)">
+                Copiar
+              </button>
+            </div>
+            <p class="copy-msg" *ngIf="copyMsg()">{{ copyMsg() }}</p>
           </div>
         </section>
 
@@ -152,7 +158,9 @@ import { environment } from '../../../../environments/environment';
     .btn-link { border: 0; background: transparent; color: var(--error); cursor: pointer; font-weight: 700; }
     .qr-result { margin-top: 1rem; display: grid; place-items: center; gap: 0.75rem; }
     .qr-result img { width: 220px; border-radius: var(--radius-sm); background: #ffffff; padding: 0.5rem; border: 2px solid var(--primary-500); }
-    .qr-code { width: 100%; padding: 0.6rem; background: var(--bg-input); border-radius: var(--radius-sm); font-size: 0.75rem; color: var(--primary-500); overflow-wrap: anywhere; border: 1px solid rgba(255, 178, 0, 0.2); }
+    .qr-code-row { display: flex; gap: 0.5rem; width: 100%; align-items: stretch; }
+    .qr-code { flex: 1; padding: 0.6rem; background: var(--bg-input); border-radius: var(--radius-sm); font-size: 0.75rem; color: var(--primary-500); overflow-wrap: anywhere; border: 1px solid rgba(255, 178, 0, 0.2); }
+    .btn-copy { border: 1px solid var(--border-default); background: var(--bg-elevated); color: var(--text-primary); border-radius: var(--radius-sm); padding: 0 0.8rem; font: inherit; cursor: pointer; }
     .qr-detail { margin-top: 0.85rem; padding: 0.75rem; background: var(--bg-input); border-radius: var(--radius-sm); display: flex; flex-direction: column; gap: 0.25rem; border: 1px solid var(--border-default); }
     .qr-preview { display: grid; place-items: center; margin-bottom: 0.5rem; }
     .qr-preview img { width: 180px; border-radius: var(--radius-sm); background: #ffffff; padding: 0.4rem; border: 2px solid var(--primary-500); }
@@ -185,6 +193,7 @@ export class PagosQrPage implements OnInit {
   protected pagoResultado = signal<any>(null);
   protected createError = signal('');
   protected payError = signal('');
+  protected copyMsg = signal('');
 
   protected comercioId = '';
   protected montoSoles = 12;
@@ -203,6 +212,11 @@ export class PagosQrPage implements OnInit {
       tipoQr: this.tipoQr()
     };
     if (this.tipoQr() === 'FIJO') {
+      if (!this.comercioId) {
+        this.creating.set(false);
+        this.createError.set('Debes seleccionar un comercio propio.');
+        return;
+      }
       payload.comercioId = this.comercioId;
       payload.expiraMinutos = Number(this.expiraMinutos);
       payload.montoCentavos = Math.round(Number(this.montoSoles) * 100);
@@ -278,6 +292,17 @@ export class PagosQrPage implements OnInit {
     });
   }
 
+  async copiarCodigo(codigo?: string): Promise<void> {
+    if (!codigo) return;
+    try {
+      await navigator.clipboard.writeText(codigo);
+      this.copyMsg.set('Código copiado.');
+      setTimeout(() => this.copyMsg.set(''), 1500);
+    } catch {
+      this.copyMsg.set('No se pudo copiar el código.');
+    }
+  }
+
   private cargarBase(): void {
     const headers = this.authService.getAuthHeaders();
     this.http.get<any[]>(`${environment.apiBaseUrl}/pagos-qr/comercios`, { headers }).subscribe({
@@ -288,7 +313,6 @@ export class PagosQrPage implements OnInit {
       error: () => {}
     });
     this.cargarQrs();
-    this.crearQr();
   }
 
   private cargarQrs(): void {

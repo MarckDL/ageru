@@ -16,6 +16,21 @@ const transferir = async (req, res, next) => {
   }
 };
 
+const buscarDestino = async (req, res, next) => {
+  try {
+    const result = await transaccionesService.buscarDestino(req.query || {});
+    if (result?.badRequest) {
+      return res.status(400).json({ message: result.message });
+    }
+    if (result?.notFound) {
+      return res.status(404).json({ message: result.message });
+    }
+    return res.json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
 const listar = async (req, res, next) => {
   try {
     const result = await transaccionesService.listar(req.user.usuarioId, req.query || {});
@@ -45,6 +60,7 @@ const revertir = async (req, res, next) => {
 
 module.exports = {
   transferir,
+  buscarDestino,
   listar,
   detalle,
   revertir

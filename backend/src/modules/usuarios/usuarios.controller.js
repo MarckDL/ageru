@@ -12,6 +12,30 @@ const listUsuarios = async (req, res, next) => {
   }
 };
 
+const listContactos = async (req, res, next) => {
+  try {
+    const term = req.query?.q || '';
+    return res.json(await usuariosService.getContactos(req.user.usuarioId, term));
+  } catch (error) {
+    next(error);
+  }
+};
+
+const saveContacto = async (req, res, next) => {
+  try {
+    const result = await usuariosService.guardarContacto(req.user.usuarioId, req.body || {});
+    if (result?.badRequest) {
+      return res.status(400).json({ message: result.message });
+    }
+    if (result?.notFound) {
+      return res.status(404).json({ message: result.message });
+    }
+    return res.json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
 /**
  * RF05 – Consultar perfil del usuario autenticado
  */
@@ -83,6 +107,8 @@ const eliminarUsuario = async (req, res, next) => {
 
 module.exports = {
   listUsuarios,
+  listContactos,
+  saveContacto,
   getPerfil,
   updatePerfil,
   cambiarEstado,

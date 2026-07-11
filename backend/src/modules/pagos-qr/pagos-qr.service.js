@@ -67,7 +67,7 @@ const enrichQr = async (pagoQr) => {
   };
 };
 
-const listarComercios = () => pagosQrRepository.listComerciosActivos();
+const listarComercios = (usuarioId) => pagosQrRepository.listComerciosActivos(usuarioId);
 
 const crear = async (usuarioId, payload) => {
   const tipoQr = String(payload?.tipoQr || 'ABIERTO').toUpperCase();
@@ -86,14 +86,27 @@ const crear = async (usuarioId, payload) => {
     return { badRequest: true, message: 'El monto debe ser mayor que cero' };
   }
 
-  const cuenta = await cuentasRepository.findCuentaPrincipal(usuarioId);
-  if (!cuenta) return { notFound: true, message: 'Cuenta no encontrada' };
-  if (cuenta.estado !== 'ACTIVA') {
+  const cuentaPrincipal = await cuentasRepository.findCuentaPrincipal(usuarioId);
+  if (!cuentaPrincipal) return { notFound: true, message: 'Cuenta no encontrada' };
+  if (cuentaPrincipal.estado !== 'ACTIVA') {
     return { badRequest: true, message: 'La cuenta debe estar activa para generar QR' };
   }
 
+  let cuentaDestinoId = cuentaPrincipal.id;
+  if (tipoQr === 'FIJO') {
+    const comercios = await pagosQrRepository.listComerciosActivos(usuarioId);
+    const comercio = comercios.find((row) => String(row.id) === String(payload.comercioId));
+    if (!comercio) {
+      return { notFound: true, message: 'Comercio no encontrado o no pertenece al usuario' };
+    }
+    if (!comercio.cuenta_abono_id) {
+      return { badRequest: true, message: 'El comercio no tiene una cuenta de abono asociada' };
+    }
+    cuentaDestinoId = comercio.cuenta_abono_id;
+  }
+
   if (tipoQr === 'ABIERTO') {
-    const existing = await pagosQrRepository.findOpenByCuentaDestino(cuenta.id);
+    const existing = await pagosQrRepository.findOpenByCuentaDestino(cuentaPrincipal.id);
     if (existing && existing.estado !== 'CANCELADO') {
       return enrichQr(existing);
     }
@@ -108,8 +121,8 @@ const crear = async (usuarioId, payload) => {
   }
 
   const token = signToken({
-    jti: tipoQr === 'ABIERTO' ? cuenta.id : crypto.randomUUID(),
-    cuentaDestinoId: cuenta.id,
+    jti: tipoQr === 'ABIERTO' ? cuentaPrincipal.id : crypto.randomUUID(),
+    cuentaDestinoId,
     tipo: tipoQr,
     iat: Date.now()
   });
@@ -121,7 +134,7 @@ const crear = async (usuarioId, payload) => {
 
   const pagoQr = await pagosQrRepository.createPagoQr({
     comercioId: tipoQr === 'ABIERTO' ? null : payload.comercioId,
-    cuentaDestinoId: cuenta.id,
+    cuentaDestinoId,
     codigoQr,
     tipoQr,
     montoCentavos: montoCentavos || null,

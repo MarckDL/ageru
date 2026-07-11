@@ -1,6 +1,8 @@
 const express = require('express');
 const {
   listUsuarios,
+  listContactos,
+  saveContacto,
   getPerfil,
   updatePerfil,
   cambiarEstado,
@@ -18,6 +20,10 @@ router.put('/perfil', requireAuth, updatePerfil);
 
 // RF10 – Listar usuarios (protegido)
 router.get('/', requireAuth, listUsuarios);
+
+// Contactos y favoritos
+router.get('/contactos', requireAuth, listContactos);
+router.post('/contactos', requireAuth, saveContacto);
 
 // RF07 – Cambiar estado del usuario
 router.patch('/:id/estado', requireAuth, cambiarEstado);

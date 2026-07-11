@@ -82,17 +82,9 @@ import { AppIconComponent } from '../../../shared/components/app-icon.component'
             <app-icon name="store" [size]="24" className="action-icon" />
             <span class="action-label">Comercios</span>
           </a>
-          <a routerLink="/dashboard/dispositivos" class="action-card">
-            <app-icon name="smartphone" [size]="24" className="action-icon" />
-            <span class="action-label">Dispositivos</span>
-          </a>
-          <a routerLink="/dashboard/bancos" class="action-card">
-            <app-icon name="building" [size]="24" className="action-icon" />
-            <span class="action-label">Bancos</span>
-          </a>
-          <a routerLink="/dashboard/usuarios" class="action-card">
+          <a routerLink="/dashboard/contactos" class="action-card">
             <app-icon name="users" [size]="24" className="action-icon" />
-            <span class="action-label">Usuarios</span>
+            <span class="action-label">Contactos</span>
           </a>
         </div>
       </div>

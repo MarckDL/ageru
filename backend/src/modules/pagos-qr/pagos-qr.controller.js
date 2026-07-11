@@ -9,7 +9,7 @@ const sendResult = (res, result) => {
 
 const listarComercios = async (req, res, next) => {
   try {
-    return res.json(await pagosQrService.listarComercios());
+    return res.json(await pagosQrService.listarComercios(req.user.usuarioId));
   } catch (error) {
     next(error);
   }

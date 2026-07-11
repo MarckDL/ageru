@@ -56,17 +56,9 @@ import { AppIconComponent } from '../../../shared/components/app-icon.component'
             <app-icon name="store" [size]="18" className="nav-icon" />
             <span class="nav-label" *ngIf="!sidebarCollapsed()">Comercios</span>
           </a>
-          <a routerLink="/dashboard/dispositivos" routerLinkActive="active" class="nav-item">
-            <app-icon name="smartphone" [size]="18" className="nav-icon" />
-            <span class="nav-label" *ngIf="!sidebarCollapsed()">Dispositivos</span>
-          </a>
-          <a routerLink="/dashboard/bancos" routerLinkActive="active" class="nav-item">
-            <app-icon name="building" [size]="18" className="nav-icon" />
-            <span class="nav-label" *ngIf="!sidebarCollapsed()">Bancos</span>
-          </a>
-          <a routerLink="/dashboard/usuarios" routerLinkActive="active" class="nav-item">
+          <a routerLink="/dashboard/contactos" routerLinkActive="active" class="nav-item">
             <app-icon name="users" [size]="18" className="nav-icon" />
-            <span class="nav-label" *ngIf="!sidebarCollapsed()">Usuarios</span>
+            <span class="nav-label" *ngIf="!sidebarCollapsed()">Contactos</span>
           </a>
         </nav>
 

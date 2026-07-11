@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const { getConnection, sql } = require('../../config/db');
+const cuentasRepository = require('../cuentas/cuentas.repository');
 let authTableEnsured = false;
 
 const hashPassword = (password) =>
@@ -71,16 +72,7 @@ const createUserWithCredentials = async ({
   await tx.begin();
 
   try {
-    const bankResult = await new sql.Request(tx).query(`
-      SELECT TOP 1 id
-      FROM bancos
-      WHERE estado = 'ACTIVO'
-      ORDER BY created_at ASC
-    `);
-    const defaultBankId = bankResult.recordset[0]?.id;
-    if (!defaultBankId) {
-      throw new Error('NO_ACTIVE_BANK');
-    }
+    await cuentasRepository.ensureSchema();
 
     const userInsert = await new sql.Request(tx)
       .input('dni', sql.Char(8), dni)
@@ -112,7 +104,7 @@ const createUserWithCredentials = async ({
     const maskedAccount = `***${String(dni).slice(-4)}`;
     await new sql.Request(tx)
       .input('usuarioId', sql.UniqueIdentifier, usuarioId)
-      .input('bancoId', sql.UniqueIdentifier, defaultBankId)
+      .input('bancoId', sql.UniqueIdentifier, null)
       .input('numeroCuenta', sql.VarChar(20), maskedAccount)
       .input('saldoCentavos', sql.BigInt, 0)
       .input('limiteCentavos', sql.BigInt, 50000)

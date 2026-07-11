@@ -11,10 +11,13 @@ const findCuentaByTelefono = async (telefono) => {
     .input('telefono', sql.VarChar(15), telefono)
     .query(`
       SELECT c.id AS cuenta_id, c.usuario_id, c.estado AS cuenta_estado,
+             c.numero_cuenta_enmascarado,
              c.saldo_centavos, c.limite_diario_centavos,
-             u.nombres, u.apellidos, u.telefono, u.estado AS usuario_estado
+             u.nombres, u.apellidos, u.telefono, u.estado AS usuario_estado,
+             b.nombre AS banco_nombre
       FROM cuentas c
       INNER JOIN usuarios u ON u.id = c.usuario_id
+      LEFT JOIN bancos b ON b.id = c.banco_id
       WHERE u.telefono = @telefono
     `);
   return result.recordset[0] || null;
@@ -30,10 +33,13 @@ const findCuentaById = async (cuentaId) => {
     .input('id', sql.UniqueIdentifier, cuentaId)
     .query(`
       SELECT c.id AS cuenta_id, c.usuario_id, c.estado AS cuenta_estado,
+             c.numero_cuenta_enmascarado,
              c.saldo_centavos, c.limite_diario_centavos,
-             u.nombres, u.apellidos, u.telefono, u.estado AS usuario_estado
+             u.nombres, u.apellidos, u.telefono, u.estado AS usuario_estado,
+             b.nombre AS banco_nombre
       FROM cuentas c
       INNER JOIN usuarios u ON u.id = c.usuario_id
+      LEFT JOIN bancos b ON b.id = c.banco_id
       WHERE c.id = @id
     `);
   return result.recordset[0] || null;
@@ -49,10 +55,13 @@ const findCuentaByNumeroCuenta = async (numeroCuenta) => {
     .input('numeroCuenta', sql.VarChar(20), numeroCuenta)
     .query(`
       SELECT TOP 1 c.id AS cuenta_id, c.usuario_id, c.estado AS cuenta_estado,
+             c.numero_cuenta_enmascarado,
              c.saldo_centavos, c.limite_diario_centavos,
-             u.nombres, u.apellidos, u.telefono, u.estado AS usuario_estado
+             u.nombres, u.apellidos, u.telefono, u.estado AS usuario_estado,
+             b.nombre AS banco_nombre
       FROM cuentas c
       INNER JOIN usuarios u ON u.id = c.usuario_id
+      LEFT JOIN bancos b ON b.id = c.banco_id
       WHERE c.numero_cuenta_enmascarado = @numeroCuenta
       ORDER BY c.created_at ASC
     `);

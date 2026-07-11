@@ -2,6 +2,7 @@ const express = require('express');
 const requireAuth = require('../../middlewares/require-auth');
 const {
   transferir,
+  buscarDestino,
   listar,
   detalle,
   revertir
@@ -10,6 +11,7 @@ const {
 const router = express.Router();
 
 router.post('/transferir', requireAuth, transferir);
+router.get('/destino', requireAuth, buscarDestino);
 router.get('/', requireAuth, listar);
 router.get('/:id', requireAuth, detalle);
 router.post('/:id/revertir', requireAuth, revertir);

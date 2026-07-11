@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../core/auth/auth.service';
 import { environment } from '../../../../environments/environment';
+import { AppIconComponent } from '../../../shared/components/app-icon.component';
 
 interface Movimiento {
   id: string;
@@ -16,8 +17,6 @@ interface Movimiento {
   created_at: string;
   esSalida: boolean;
 }
-
-import { AppIconComponent } from '../../../shared/components/app-icon.component';
 
 @Component({
   standalone: true,
@@ -64,7 +63,7 @@ import { AppIconComponent } from '../../../shared/components/app-icon.component'
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let m of movimientos()" class="mov-row">
+              <tr *ngFor="let m of movimientos()" class="mov-row" (click)="abrirDetalle(m)">
                 <td class="date-cell">{{ m.created_at | date:'dd/MM/yy HH:mm' }}</td>
                 <td>
                   <span class="tipo-badge" [ngClass]="'tipo-' + m.tipo.toLowerCase()">
@@ -89,6 +88,32 @@ import { AppIconComponent } from '../../../shared/components/app-icon.component'
               </tr>
             </tbody>
           </table>
+        </div>
+      </div>
+
+      <div class="modal-backdrop" *ngIf="selectedMovimiento()" (click)="cerrarDetalle()">
+        <div class="modal" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <div>
+              <h2>Detalle del movimiento</h2>
+              <p>{{ selectedMovimiento()?.referencia_externa }}</p>
+            </div>
+            <button type="button" class="close-btn" (click)="cerrarDetalle()">Cerrar</button>
+          </div>
+
+          <div class="modal-body" *ngIf="!detalleLoading()">
+            <div class="detail-grid">
+              <div><span>Fecha</span><strong>{{ detalleMovimiento()?.created_at | date:'dd/MM/yy HH:mm' }}</strong></div>
+              <div><span>Tipo</span><strong>{{ detalleMovimiento()?.tipo }}</strong></div>
+              <div><span>Estado</span><strong>{{ detalleMovimiento()?.estado }}</strong></div>
+              <div><span>Monto</span><strong>S/ {{ detalleMovimiento()?.monto_soles | number:'1.2-2' }}</strong></div>
+              <div><span>Origen</span><strong>{{ detalleMovimiento()?.origen_nombre || '—' }}</strong></div>
+              <div><span>Destino</span><strong>{{ detalleMovimiento()?.destino_nombre || '—' }}</strong></div>
+              <div class="full"><span>Descripción</span><strong>{{ detalleMovimiento()?.descripcion || '—' }}</strong></div>
+              <div class="full"><span>Referencia</span><strong>{{ detalleMovimiento()?.referencia_externa || '—' }}</strong></div>
+            </div>
+          </div>
+          <div class="loading" *ngIf="detalleLoading()">Cargando detalle...</div>
         </div>
       </div>
     </div>
@@ -141,6 +166,7 @@ import { AppIconComponent } from '../../../shared/components/app-icon.component'
     }
     .mov-row { transition: background var(--transition-fast); }
     .mov-row:hover { background: rgba(255, 178, 0, 0.04); }
+    .mov-row { cursor: pointer; }
 
     .date-cell { white-space: nowrap; font-size: 0.82rem; }
     .desc-cell { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -165,6 +191,62 @@ import { AppIconComponent } from '../../../shared/components/app-icon.component'
     .badge-warning { background: var(--warning-bg); color: var(--warning); }
     .badge-error { background: var(--error-bg); color: var(--error); }
 
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      display: grid;
+      place-items: center;
+      padding: 1rem;
+      z-index: 50;
+    }
+    .modal {
+      width: min(720px, 100%);
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1rem;
+      box-shadow: var(--shadow-lg);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+    .modal-header h2 { font-size: 1.1rem; margin-bottom: 0.2rem; }
+    .modal-header p { color: var(--text-muted); font-size: 0.82rem; word-break: break-all; }
+    .close-btn {
+      border: 1px solid var(--border-default);
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      border-radius: var(--radius-sm);
+      padding: 0.5rem 0.8rem;
+      cursor: pointer;
+    }
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+    .detail-grid div {
+      padding: 0.75rem;
+      border-radius: var(--radius-sm);
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+    }
+    .detail-grid span {
+      display: block;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .detail-grid strong { color: var(--text-primary); }
+    .detail-grid .full { grid-column: 1 / -1; }
+
     @media (max-width: 768px) {
       .table-container { overflow-x: auto; }
     }
@@ -176,6 +258,9 @@ export class MovimientosPage implements OnInit {
 
   protected movimientos = signal<Movimiento[]>([]);
   protected loading = signal(true);
+  protected detalleLoading = signal(false);
+  protected selectedMovimiento = signal<any>(null);
+  protected detalleMovimiento = signal<any>(null);
 
   protected entradas = signal(0);
   protected salidas = signal(0);
@@ -193,5 +278,28 @@ export class MovimientosPage implements OnInit {
         this.loading.set(false);
       }
     });
+  }
+
+  abrirDetalle(movimiento: Movimiento): void {
+    this.selectedMovimiento.set(movimiento);
+    this.detalleMovimiento.set(movimiento);
+    this.detalleLoading.set(true);
+    this.http.get<any>(`${environment.apiBaseUrl}/transacciones/${movimiento.id}`, {
+      headers: this.authService.getAuthHeaders()
+    }).subscribe({
+      next: (data) => {
+        this.detalleMovimiento.set(data);
+        this.detalleLoading.set(false);
+      },
+      error: () => {
+        this.detalleLoading.set(false);
+      }
+    });
+  }
+
+  cerrarDetalle(): void {
+    this.selectedMovimiento.set(null);
+    this.detalleMovimiento.set(null);
+    this.detalleLoading.set(false);
   }
 }

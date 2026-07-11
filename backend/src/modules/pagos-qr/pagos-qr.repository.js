@@ -151,13 +151,19 @@ const findOpenByCuentaDestino = async (cuentaDestinoId) => {
   return result.recordset[0] || null;
 };
 
-const listComerciosActivos = async () => {
+const listComerciosActivos = async (usuarioId) => {
   await ensurePagosQrSchema();
   const pool = await getConnection();
-  const result = await pool.request().query(`
-    SELECT id, ruc, razon_social, nombre_comercial, categoria, estado
+  const request = pool.request();
+  if (usuarioId) {
+    request.input('usuarioId', sql.UniqueIdentifier, usuarioId);
+  }
+  const result = await request.query(`
+    SELECT id, ruc, razon_social, nombre_comercial, categoria, estado,
+           cuenta_abono_id
     FROM comercios
     WHERE estado = 'ACTIVO'
+      ${usuarioId ? 'AND usuario_id = @usuarioId' : ''}
     ORDER BY nombre_comercial, razon_social
   `);
   return result.recordset;

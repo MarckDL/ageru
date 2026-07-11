@@ -1,5 +1,6 @@
 const transaccionesRepository = require('./transacciones.repository');
 const cuentasRepository = require('../cuentas/cuentas.repository');
+const usuariosRepository = require('../usuarios/usuarios.repository');
 
 const parseMontoCentavos = (value) => {
   const monto = Number(value);
@@ -97,6 +98,28 @@ const transferir = async (usuarioId, payload) => {
   return buildTransferResponse(result.transaccion, 'Transferencia confirmada');
 };
 
+const buscarDestino = async (payload) => {
+  if (payload?.telefono) {
+    const destino = await transaccionesRepository.findCuentaByTelefono(String(payload.telefono).trim());
+    if (!destino) return { notFound: true, message: 'No encontramos un usuario con ese telefono' };
+    return destino;
+  }
+
+  if (payload?.numeroCuenta) {
+    const destino = await transaccionesRepository.findCuentaByNumeroCuenta(String(payload.numeroCuenta).trim());
+    if (!destino) return { notFound: true, message: 'No encontramos un usuario con ese numero de cuenta' };
+    return destino;
+  }
+
+  if (payload?.usuarioId) {
+    const destino = await usuariosRepository.findUsuarioById(payload.usuarioId);
+    if (!destino) return { notFound: true, message: 'Contacto no encontrado' };
+    return destino;
+  }
+
+  return { badRequest: true, message: 'Indica telefono o numeroCuenta' };
+};
+
 const listar = async (usuarioId, filters) => {
   const cuenta = await cuentasRepository.findCuentaPrincipal(usuarioId);
   if (!cuenta) return { notFound: true, message: 'Cuenta no encontrada' };
@@ -141,6 +164,7 @@ const revertir = async (user, transaccionId) => {
 
 module.exports = {
   transferir,
+  buscarDestino,
   listar,
   detalle,
   revertir

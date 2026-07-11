@@ -36,12 +36,16 @@ interface PerfilData {
           </div>
           <div class="avatar-info">
             <h2>{{ perfil()?.nombres }} {{ perfil()?.apellidos }}</h2>
+            <p class="user-handle">@{{ authService.currentUser()?.username }}</p>
             <span class="badge" [ngClass]="{
               'badge-success': perfil()?.estado === 'ACTIVO',
               'badge-warning': perfil()?.estado === 'PENDIENTE_VERIFICACION',
               'badge-error': perfil()?.estado === 'BLOQUEADO'
             }">{{ perfil()?.estado }}</span>
           </div>
+          <button type="button" class="btn-edit" (click)="editOpen.set(!editOpen())">
+            {{ editOpen() ? 'Ocultar edición' : 'Editar datos' }}
+          </button>
         </div>
 
         <!-- Info cards -->
@@ -69,7 +73,7 @@ interface PerfilData {
         </div>
 
         <!-- Edit Form -->
-        <div class="edit-section">
+        <div class="edit-section" *ngIf="editOpen()">
           <h3>Actualizar datos</h3>
           <form class="edit-form" (ngSubmit)="guardar()" #editForm="ngForm">
             <div class="form-row">
@@ -141,6 +145,29 @@ interface PerfilData {
       font-size: 1.25rem;
       font-weight: 600;
       margin-bottom: 0.3rem;
+    }
+    .user-handle {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-bottom: 0.45rem;
+    }
+
+    .btn-edit {
+      margin-left: auto;
+      align-self: flex-start;
+      padding: 0.6rem 1rem;
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+    .btn-edit:hover {
+      border-color: var(--primary-500);
+      color: var(--primary-500);
     }
 
     .badge {
@@ -267,13 +294,14 @@ interface PerfilData {
 })
 export class PerfilPage implements OnInit {
   private readonly http = inject(HttpClient);
-  private readonly authService = inject(AuthService);
+  protected readonly authService = inject(AuthService);
 
   protected perfil = signal<PerfilData | null>(null);
   protected loading = signal(true);
   protected saving = signal(false);
   protected successMsg = signal('');
   protected errorMsg = signal('');
+  protected editOpen = signal(false);
   protected editModel = { nombres: '', apellidos: '', fechaNacimiento: '' };
 
   ngOnInit(): void {

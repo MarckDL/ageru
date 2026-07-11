@@ -41,6 +41,10 @@ import { environment } from '../../../../environments/environment';
             RUC validado por SUNAT
           </p>
 
+          <p class="helper-text">
+            Al registrar el comercio se crea una cuenta de abono separada para ese negocio.
+          </p>
+
           <div class="field">
             <label>Razón social</label>
             <input [(ngModel)]="form.razonSocial" />
@@ -105,9 +109,10 @@ import { environment } from '../../../../environments/environment';
             <div>
               <strong>{{ c.nombre_comercial || c.razon_social }}</strong>
               <span>{{ c.ruc }} - {{ c.categoria }} - {{ c.estado }}</span>
+              <span>Cuenta: {{ c.numero_cuenta_enmascarado || 'Pendiente' }} - {{ c.banco_nombre || 'Sin banco' }}</span>
             </div>
 
-            <span>{{ c.numero_cuenta_enmascarado || 'Cuenta asociada' }}</span>
+            <span>{{ c.cuenta_estado || 'ACTIVA' }}</span>
           </div>
         </div>
       </section>
@@ -183,6 +188,11 @@ import { environment } from '../../../../environments/environment';
       color: var(--success);
       font-size: 0.85rem;
       margin-top: 0.5rem;
+    }
+    .helper-text {
+      color: var(--text-secondary);
+      font-size: 0.82rem;
+      margin: 0.5rem 0 0.75rem;
     }
 
     .msg-error {

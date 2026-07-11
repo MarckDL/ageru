@@ -1,9 +1,44 @@
 const { getConnection, sql } = require('../../config/db');
 
+let schemaEnsured = false;
+
+const ensureSchema = async () => {
+  if (schemaEnsured) return;
+  const pool = await getConnection();
+  await pool.request().query(`
+    IF EXISTS (
+      SELECT 1
+      FROM sys.key_constraints
+      WHERE name = 'uq_cuentas_usuario'
+    )
+    BEGIN
+      ALTER TABLE cuentas DROP CONSTRAINT uq_cuentas_usuario;
+    END
+
+    IF EXISTS (
+      SELECT 1
+      FROM sys.columns
+      WHERE object_id = OBJECT_ID('cuentas')
+        AND name = 'banco_id'
+        AND is_nullable = 0
+    )
+    BEGIN
+      ALTER TABLE cuentas ALTER COLUMN banco_id UNIQUEIDENTIFIER NULL;
+    END
+
+    IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'idx_cuentas_usuario_id')
+    BEGIN
+      CREATE INDEX idx_cuentas_usuario_id ON cuentas (usuario_id);
+    END
+  `);
+  schemaEnsured = true;
+};
+
 /**
  * RF18 – Listar cuentas del usuario
  */
 const findCuentasByUsuarioId = async (usuarioId) => {
+  await ensureSchema();
   const pool = await getConnection();
   const result = await pool
     .request()
@@ -15,8 +50,9 @@ const findCuentasByUsuarioId = async (usuarioId) => {
              c.created_at, c.updated_at,
              b.nombre AS banco_nombre, b.codigo_swift
       FROM cuentas c
-      INNER JOIN bancos b ON b.id = c.banco_id
+      LEFT JOIN bancos b ON b.id = c.banco_id
       WHERE c.usuario_id = @usuarioId
+      ORDER BY c.created_at DESC
     `);
   return result.recordset;
 };
@@ -25,6 +61,7 @@ const findCuentasByUsuarioId = async (usuarioId) => {
  * RF11 – Consultar saldo (cuenta principal del usuario)
  */
 const findCuentaPrincipal = async (usuarioId) => {
+  await ensureSchema();
   const pool = await getConnection();
   const result = await pool
     .request()
@@ -36,8 +73,49 @@ const findCuentaPrincipal = async (usuarioId) => {
              c.created_at, c.updated_at,
              b.nombre AS banco_nombre, b.codigo_swift
       FROM cuentas c
-      INNER JOIN bancos b ON b.id = c.banco_id
+      LEFT JOIN bancos b ON b.id = c.banco_id
       WHERE c.usuario_id = @usuarioId
+      ORDER BY c.created_at ASC
+    `);
+  return result.recordset[0] || null;
+};
+
+const createCuentaForUsuario = async ({
+  usuarioId,
+  bancoId,
+  numeroCuentaEnmascarado,
+  saldoCentavos = 0,
+  limiteDiarioCentavos = 50000,
+  estado = 'ACTIVA'
+}) => {
+  await ensureSchema();
+  const pool = await getConnection();
+  const result = await pool
+    .request()
+    .input('usuarioId', sql.UniqueIdentifier, usuarioId)
+    .input('bancoId', sql.UniqueIdentifier, bancoId || null)
+    .input('numeroCuenta', sql.VarChar(20), numeroCuentaEnmascarado)
+    .input('saldoCentavos', sql.BigInt, saldoCentavos)
+    .input('limiteDiarioCentavos', sql.BigInt, limiteDiarioCentavos)
+    .input('estado', sql.VarChar(20), estado)
+    .query(`
+      INSERT INTO cuentas (
+        usuario_id,
+        banco_id,
+        numero_cuenta_enmascarado,
+        saldo_centavos,
+        limite_diario_centavos,
+        estado
+      )
+      OUTPUT inserted.*
+      VALUES (
+        @usuarioId,
+        @bancoId,
+        @numeroCuenta,
+        @saldoCentavos,
+        @limiteDiarioCentavos,
+        @estado
+      )
     `);
   return result.recordset[0] || null;
 };
@@ -46,6 +124,7 @@ const findCuentaPrincipal = async (usuarioId) => {
  * RF14 – Actualizar saldo (operación atómica)
  */
 const actualizarSaldo = async (cuentaId, montoCentavos) => {
+  await ensureSchema();
   const pool = await getConnection();
   const result = await pool
     .request()
@@ -68,6 +147,7 @@ const actualizarSaldo = async (cuentaId, montoCentavos) => {
  * RF15 – Establecer límite diario
  */
 const setLimiteDiario = async (cuentaId, limiteCentavos) => {
+  await ensureSchema();
   const pool = await getConnection();
   const result = await pool
     .request()
@@ -90,6 +170,7 @@ const setLimiteDiario = async (cuentaId, limiteCentavos) => {
  * RF17 – Asociar banco
  */
 const asociarBanco = async (cuentaId, bancoId) => {
+  await ensureSchema();
   const pool = await getConnection();
   const result = await pool
     .request()
@@ -113,6 +194,7 @@ const asociarBanco = async (cuentaId, bancoId) => {
  * RF20 – Desactivar / cambiar estado de cuenta
  */
 const cambiarEstadoCuenta = async (cuentaId, nuevoEstado) => {
+  await ensureSchema();
   const pool = await getConnection();
   const result = await pool
     .request()
@@ -135,6 +217,7 @@ const cambiarEstadoCuenta = async (cuentaId, nuevoEstado) => {
  * RF19 – Consultar movimientos (historial de transacciones por cuenta)
  */
 const findMovimientosByCuentaId = async (cuentaId) => {
+  await ensureSchema();
   const pool = await getConnection();
   const result = await pool
     .request()
@@ -162,6 +245,7 @@ const findMovimientosByCuentaId = async (cuentaId) => {
  * Listar bancos activos
  */
 const findBancosActivos = async () => {
+  await ensureSchema();
   const pool = await getConnection();
   const result = await pool.request().query(`
     SELECT id, nombre, codigo_swift, estado
@@ -173,8 +257,10 @@ const findBancosActivos = async () => {
 };
 
 module.exports = {
+  ensureSchema,
   findCuentasByUsuarioId,
   findCuentaPrincipal,
+  createCuentaForUsuario,
   actualizarSaldo,
   setLimiteDiario,
   asociarBanco,

@@ -1,12 +1,8 @@
 import { Component, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import {
-  AuthService,
-  RegisterPayload
-} from '../../../core/auth/auth.service';
 import { CommonModule } from '@angular/common';
-
+import { AuthService, RegisterPayload } from '../../../core/auth/auth.service';
 import { AppIconComponent } from '../../../shared/components/app-icon.component';
 
 @Component({
@@ -29,6 +25,10 @@ import { AppIconComponent } from '../../../shared/components/app-icon.component'
           {{ mode === 'login' ? 'Inicia sesión en tu cuenta' : 'Crea tu cuenta nueva' }}
         </p>
 
+        <p class="loading-note" *ngIf="loading && mode === 'register'">
+          Estamos creando tu cuenta, espera un momento...
+        </p>
+
         <div class="tabs">
           <button type="button" [class.active]="mode === 'login'" (click)="setMode('login')">
             Iniciar sesión
@@ -38,7 +38,6 @@ import { AppIconComponent } from '../../../shared/components/app-icon.component'
           </button>
         </div>
 
-        <!-- Login Form -->
         <form class="form" *ngIf="mode === 'login'" (ngSubmit)="login()" #loginForm="ngForm">
           <div class="field">
             <label for="login-username">Usuario</label>
@@ -46,7 +45,7 @@ import { AppIconComponent } from '../../../shared/components/app-icon.component'
               id="login-username"
               name="username"
               [(ngModel)]="username"
-              placeholder="tu&#64;email.com"
+              placeholder="tu@email.com"
               required
               autocomplete="username"
             />
@@ -68,13 +67,7 @@ import { AppIconComponent } from '../../../shared/components/app-icon.component'
           </button>
         </form>
 
-        <!-- Register Form -->
-        <form
-          class="form"
-          *ngIf="mode === 'register'"
-          (ngSubmit)="register()"
-          #registerForm="ngForm"
-        >
+        <form class="form" *ngIf="mode === 'register'" (ngSubmit)="register()" #registerForm="ngForm">
           <div class="form-row">
             <div class="field">
               <label for="reg-nombres">Nombres</label>
@@ -92,7 +85,7 @@ import { AppIconComponent } from '../../../shared/components/app-icon.component'
               name="regUsername"
               [(ngModel)]="registerModel.username"
               required
-              placeholder="tu&#64;email.com"
+              placeholder="tu@email.com"
             />
           </div>
           <div class="field">
@@ -156,8 +149,16 @@ import { AppIconComponent } from '../../../shared/components/app-icon.component'
           ¿No tienes cuenta? Usa la pestaña <strong>"Registrarme"</strong>.
         </p>
         <p class="help" *ngIf="mode === 'register'">
-          Al registrarte, te cambiamos automáticamente a inicio de sesión.
+          Al terminar, verás una confirmación y luego podrás ir a ingresar.
         </p>
+        <button
+          type="button"
+          class="btn-link"
+          *ngIf="success && mode === 'register'"
+          (click)="setMode('login')"
+        >
+          Ir a ingresar
+        </button>
         <div class="msg-error" *ngIf="error">{{ error }}</div>
         <div class="msg-success" *ngIf="success">{{ success }}</div>
       </div>
@@ -196,7 +197,6 @@ import { AppIconComponent } from '../../../shared/components/app-icon.component'
       right: -100px;
       animation: float 10s ease-in-out infinite reverse;
     }
-
     .login-card {
       position: relative;
       z-index: 1;
@@ -209,7 +209,6 @@ import { AppIconComponent } from '../../../shared/components/app-icon.component'
       box-shadow: var(--shadow-lg);
       animation: fadeIn 0.5s ease;
     }
-
     .back-link {
       display: inline-flex;
       align-items: center;
@@ -222,7 +221,6 @@ import { AppIconComponent } from '../../../shared/components/app-icon.component'
     .back-link:hover {
       color: var(--primary-400);
     }
-
     .brand {
       display: flex;
       align-items: center;
@@ -239,13 +237,20 @@ import { AppIconComponent } from '../../../shared/components/app-icon.component'
       background-clip: text;
       margin: 0;
     }
-
     .subtitle {
       color: var(--text-secondary);
       font-size: 0.95rem;
-      margin-bottom: 1.25rem;
+      margin-bottom: 1rem;
     }
-
+    .loading-note {
+      padding: 0.6rem 0.8rem;
+      margin-bottom: 0.85rem;
+      border-radius: var(--radius-sm);
+      background: rgba(255, 178, 0, 0.08);
+      color: var(--primary-400);
+      font-size: 0.82rem;
+      text-align: center;
+    }
     .tabs {
       display: flex;
       gap: 0;
@@ -275,7 +280,6 @@ import { AppIconComponent } from '../../../shared/components/app-icon.component'
     .tabs button:not(.active):hover {
       color: var(--text-secondary);
     }
-
     .form {
       display: grid;
       gap: 0.9rem;
@@ -313,7 +317,6 @@ import { AppIconComponent } from '../../../shared/components/app-icon.component'
       border-color: var(--primary-500);
       box-shadow: 0 0 0 3px rgba(255, 178, 0, 0.15);
     }
-
     .btn-submit {
       width: 100%;
       padding: 0.75rem;
@@ -336,7 +339,6 @@ import { AppIconComponent } from '../../../shared/components/app-icon.component'
       opacity: 0.5;
       cursor: not-allowed;
     }
-
     .help {
       color: var(--text-muted);
       font-size: 0.82rem;
@@ -346,7 +348,22 @@ import { AppIconComponent } from '../../../shared/components/app-icon.component'
     .help strong {
       color: var(--primary-400);
     }
-
+    .btn-link {
+      width: 100%;
+      margin-top: 0.5rem;
+      border: 1px solid var(--border-default);
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      border-radius: var(--radius-sm);
+      padding: 0.65rem 0.8rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+    }
+    .btn-link:hover {
+      border-color: var(--primary-500);
+      color: var(--primary-500);
+    }
     .msg-error {
       margin-top: 0.75rem;
       padding: 0.6rem 0.8rem;
@@ -365,7 +382,6 @@ import { AppIconComponent } from '../../../shared/components/app-icon.component'
       font-size: 0.85rem;
       text-align: center;
     }
-
     @media (max-width: 500px) {
       .form-row { grid-template-columns: 1fr; }
       .login-card { padding: 1.5rem; }
@@ -419,12 +435,10 @@ export class LoginPage {
     this.success = '';
     this.loading = true;
     this.authService.register(this.registerModel).subscribe({
-      next: () => {
+      next: (res) => {
         this.loading = false;
-        this.mode = 'login';
-        this.username = this.registerModel.username;
         this.password = '';
-        this.success = 'Cuenta creada exitosamente. Ahora inicia sesión.';
+        this.success = res?.message || 'Cuenta creada correctamente. Ya puedes iniciar sesión.';
       },
       error: (err) => {
         this.loading = false;

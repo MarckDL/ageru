@@ -70,6 +70,10 @@ export const routes: Routes = [
         component: BancosPage
       },
       {
+        path: 'contactos',
+        component: UsuariosPage
+      },
+      {
         path: 'usuarios',
         component: UsuariosPage
       }

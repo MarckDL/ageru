@@ -40,7 +40,11 @@ import { AppIconComponent } from '../../../shared/components/app-icon.component'
             </div>
             <div class="saldo-detail">
               <span class="detail-label">Banco</span>
-              <span class="detail-value">{{ saldoInfo()?.bancoNombre }}</span>
+              <span class="detail-value">{{ saldoInfo()?.bancoNombre || 'Sin banco vinculado' }}</span>
+            </div>
+            <div class="saldo-detail">
+              <span class="detail-label">Cuenta principal</span>
+              <span class="detail-value">Visible para transferencias y QR abierto</span>
             </div>
           </div>
         </div>
@@ -48,10 +52,14 @@ import { AppIconComponent } from '../../../shared/components/app-icon.component'
         <!-- Cuentas List -->
         <div class="section" *ngIf="cuentas().length">
           <h2>Detalle de cuentas</h2>
+          <p class="section-note">Cada comercio puede tener su propia cuenta de abono. Estado y banco se muestran como referencia.</p>
           <div class="cuentas-grid">
             <div class="cuenta-card" *ngFor="let cuenta of cuentas()">
               <div class="cuenta-header">
-                <span class="cuenta-num">{{ cuenta.numero_cuenta_enmascarado }}</span>
+                <div class="cuenta-headline">
+                  <span class="cuenta-num">{{ cuenta.numero_cuenta_enmascarado }}</span>
+                  <span class="mini-badge" *ngIf="cuenta.id === saldoInfo()?.cuentaId">Principal</span>
+                </div>
                 <span class="badge" [ngClass]="{
                   'badge-success': cuenta.estado === 'ACTIVA',
                   'badge-warning': cuenta.estado === 'SUSPENDIDA',
@@ -69,7 +77,11 @@ import { AppIconComponent } from '../../../shared/components/app-icon.component'
                 </div>
                 <div class="cuenta-row">
                   <span>Banco</span>
-                  <span>{{ cuenta.banco_nombre }}</span>
+                  <span>{{ cuenta.banco_nombre || 'Sin banco vinculado' }}</span>
+                </div>
+                <div class="cuenta-row">
+                  <span>Uso</span>
+                  <span>{{ cuenta.id === saldoInfo()?.cuentaId ? 'Cuenta principal' : 'Cuenta de comercio / secundaria' }}</span>
                 </div>
               </div>
             </div>
@@ -94,44 +106,7 @@ import { AppIconComponent } from '../../../shared/components/app-icon.component'
                 </button>
               </div>
               <div class="msg-success" *ngIf="limiteMsg()">{{ limiteMsg() }}</div>
-            </div>
-
-            <!-- Cambiar banco -->
-            <div class="config-card">
-              <h3><app-icon name="building" [size]="18" /> Banco asociado</h3>
-              <p>Cambia el banco vinculado a tu cuenta.</p>
-              <div class="inline-form">
-                <div class="field">
-                  <label for="banco-select">Banco</label>
-                  <select id="banco-select" [(ngModel)]="selectedBancoId">
-                    <option value="" disabled>Seleccionar...</option>
-                    <option *ngFor="let b of bancos()" [value]="b.id">{{ b.nombre }}</option>
-                  </select>
-                </div>
-                <button class="btn-action" (click)="cambiarBanco()" [disabled]="savingBanco()">
-                  {{ savingBanco() ? 'Guardando...' : 'Cambiar' }}
-                </button>
-              </div>
-              <div class="msg-success" *ngIf="bancoMsg()">{{ bancoMsg() }}</div>
-            </div>
-
-            <!-- Estado de cuenta -->
-            <div class="config-card">
-              <h3><app-icon name="activity" [size]="18" /> Estado de cuenta</h3>
-              <p>Activa o suspende tu cuenta temporalmente.</p>
-              <div class="inline-form">
-                <div class="field">
-                  <label for="estado-select">Estado</label>
-                  <select id="estado-select" [(ngModel)]="selectedEstado">
-                    <option value="ACTIVA">ACTIVA</option>
-                    <option value="SUSPENDIDA">SUSPENDIDA</option>
-                  </select>
-                </div>
-                <button class="btn-action" (click)="cambiarEstado()" [disabled]="savingEstado()">
-                  {{ savingEstado() ? 'Guardando...' : 'Actualizar' }}
-                </button>
-              </div>
-              <div class="msg-success" *ngIf="estadoMsg()">{{ estadoMsg() }}</div>
+              <p class="config-hint">El banco y el estado de la cuenta se mantienen como control del sistema.</p>
             </div>
           </div>
         </div>
@@ -174,6 +149,11 @@ import { AppIconComponent } from '../../../shared/components/app-icon.component'
     .saldo-detail { display: flex; flex-direction: column; }
     .detail-label { font-size: 0.75rem; color: var(--text-muted); }
     .detail-value { font-size: 0.95rem; font-weight: 500; }
+    .section-note {
+      color: var(--text-secondary);
+      font-size: 0.84rem;
+      margin-bottom: 0.75rem;
+    }
 
     /* Cuentas Grid */
     .section { margin-bottom: 2rem; }
@@ -184,8 +164,20 @@ import { AppIconComponent } from '../../../shared/components/app-icon.component'
       transition: all var(--transition-fast);
     }
     .cuenta-card:hover { border-color: var(--primary-700); }
-    .cuenta-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    .cuenta-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; gap: 0.75rem; }
+    .cuenta-headline { display: flex; align-items: center; gap: 0.5rem; }
     .cuenta-num { font-weight: 600; font-size: 1.1rem; }
+    .mini-badge {
+      display: inline-flex;
+      padding: 0.18rem 0.5rem;
+      border-radius: var(--radius-full);
+      background: rgba(255, 178, 0, 0.12);
+      color: var(--primary-500);
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
     .cuenta-row { display: flex; justify-content: space-between; padding: 0.4rem 0; font-size: 0.9rem; }
     .cuenta-row span { color: var(--text-secondary); }
     .cuenta-row strong { color: var(--primary-400); }
@@ -206,6 +198,7 @@ import { AppIconComponent } from '../../../shared/components/app-icon.component'
       color: var(--primary-500);
     }
     .config-card p { color: var(--text-secondary); font-size: 0.82rem; margin-bottom: 0.75rem; }
+    .config-hint { margin-top: 0.5rem; color: var(--text-muted); font-size: 0.78rem; }
     .inline-form { display: flex; gap: 0.5rem; align-items: flex-end; }
     .field { display: flex; flex-direction: column; gap: 0.2rem; flex: 1; }
     .field label { font-size: 0.75rem; color: var(--text-muted); }
@@ -250,20 +243,11 @@ export class CuentasPage implements OnInit {
   protected loading = signal(true);
   protected saldoInfo = signal<any>(null);
   protected cuentas = signal<any[]>([]);
-  protected bancos = signal<any[]>([]);
   protected errorMsg = signal('');
 
   protected limiteSoles = 500;
   protected savingLimite = signal(false);
   protected limiteMsg = signal('');
-
-  protected selectedBancoId = '';
-  protected savingBanco = signal(false);
-  protected bancoMsg = signal('');
-
-  protected selectedEstado = 'ACTIVA';
-  protected savingEstado = signal(false);
-  protected estadoMsg = signal('');
 
   ngOnInit(): void {
     this.cargarDatos();
@@ -285,10 +269,6 @@ export class CuentasPage implements OnInit {
       error: () => { this.loading.set(false); }
     });
 
-    this.http.get<any[]>(`${this.apiUrl}/cuentas/bancos`, { headers }).subscribe({
-      next: (data) => this.bancos.set(data),
-      error: () => {}
-    });
   }
 
   setLimite(): void {
@@ -307,36 +287,4 @@ export class CuentasPage implements OnInit {
     });
   }
 
-  cambiarBanco(): void {
-    if (!this.selectedBancoId) return;
-    this.savingBanco.set(true);
-    this.bancoMsg.set('');
-    const headers = this.authService.getAuthHeaders();
-    this.http.patch<any>(`${this.apiUrl}/cuentas/banco`, {
-      bancoId: this.selectedBancoId
-    }, { headers }).subscribe({
-      next: (data) => {
-        this.savingBanco.set(false);
-        this.bancoMsg.set(`Banco cambiado a: ${data.banco_nombre}`);
-        this.cargarDatos();
-      },
-      error: () => { this.savingBanco.set(false); }
-    });
-  }
-
-  cambiarEstado(): void {
-    this.savingEstado.set(true);
-    this.estadoMsg.set('');
-    const headers = this.authService.getAuthHeaders();
-    this.http.patch<any>(`${this.apiUrl}/cuentas/estado`, {
-      estado: this.selectedEstado
-    }, { headers }).subscribe({
-      next: (data) => {
-        this.savingEstado.set(false);
-        this.estadoMsg.set(`Estado actualizado: ${data.estado}`);
-        this.cargarDatos();
-      },
-      error: () => { this.savingEstado.set(false); }
-    });
-  }
 }

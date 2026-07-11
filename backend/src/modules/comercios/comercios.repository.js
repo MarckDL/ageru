@@ -64,9 +64,14 @@ const listByUsuario = async (usuarioId) => {
   await ensureSchema();
   const pool = await getConnection();
   const result = await pool.request().input('usuarioId', sql.UniqueIdentifier, usuarioId).query(`
-    SELECT c.*, ca.numero_cuenta_enmascarado
+    SELECT c.*,
+           ca.numero_cuenta_enmascarado,
+           ca.limite_diario_centavos,
+           ca.estado AS cuenta_estado,
+           b.nombre AS banco_nombre
     FROM comercios c
     LEFT JOIN cuentas ca ON ca.id = c.cuenta_abono_id
+    LEFT JOIN bancos b ON b.id = ca.banco_id
     WHERE c.usuario_id = @usuarioId
     ORDER BY c.created_at DESC
   `);
