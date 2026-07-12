@@ -1,6 +1,5 @@
 const crypto = require('crypto');
 const { getConnection, sql } = require('../../config/db');
-const cuentasRepository = require('../cuentas/cuentas.repository');
 let authTableEnsured = false;
 
 const hashPassword = (password) =>
@@ -72,8 +71,6 @@ const createUserWithCredentials = async ({
   await tx.begin();
 
   try {
-    await cuentasRepository.ensureSchema();
-
     const userInsert = await new sql.Request(tx)
       .input('dni', sql.Char(8), dni)
       .input('telefono', sql.VarChar(15), telefono)

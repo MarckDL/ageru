@@ -92,13 +92,6 @@ const register = async (payload) => {
     });
     return created;
   } catch (error) {
-    if (error.message === 'NO_ACTIVE_BANK') {
-      return {
-        badRequest: true,
-        message: 'No hay bancos activos para crear la cuenta inicial'
-      };
-    }
-
     if (error?.originalError?.info?.number === 2627 || error?.originalError?.info?.number === 2601) {
       const details = String(error?.originalError?.info?.message || '').toLowerCase();
       if (details.includes('uq_usuarios_dni')) {

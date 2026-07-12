@@ -1,4 +1,4 @@
-# Ageru - Sistema de Pagos (Sprint 3)
+# Ageru - Sistema de Pagos
 
 Sistema de gestion y visualizacion de datos, inspirado en plataformas de pago como Yape.
 
@@ -93,7 +93,7 @@ Ejemplo actual de rutas:
 - `/dashboard/comercios` -> registro y reportes de comercio
 - `/dashboard/dispositivos` -> dispositivos del usuario
 - `/dashboard/bancos` -> catalogo y reporte por banco
-- `/dashboard/usuarios` -> usuarios
+- `/dashboard/usuarios` -> contactos y favoritos
 
 ### Ejemplo: crear una nueva pagina
 
@@ -156,9 +156,9 @@ Endpoints disponibles:
 `POST /api/auth/register` ahora crea en una sola transaccion:
 - `usuarios` (datos personales)
 - `auth_credenciales` (username + password hash)
-- `cuentas` (cuenta inicial en estado `ACTIVA`, saldo 0)
+- `cuentas` (cuenta inicial en estado `ACTIVA`, saldo 0 y sin banco afiliado)
 
-Nota: para registrar, debe existir al menos un banco `ACTIVO` en la tabla `bancos`.
+La confirmacion de registro se muestra en la UI apenas el backend responde con exito, sin cambiar de vista automaticamente.
 
 Luego registra las rutas en `src/routes/index.js`, por ejemplo:
 - `router.use('/auth', authRouter);`
@@ -237,6 +237,27 @@ Cambios de base de datos para Sprint 3:
 - `comercios.cuenta_abono_id` define la cuenta donde se acreditan cobros.
 - `comercios.direccion_fiscal` y `comercios.telefono_contacto` guardan datos operativos del local.
 - `idx_comercios_usuario_id` acelera las consultas de comercios por usuario.
+
+## Sprint 4: perfil, cuentas, movimientos y contactos
+
+Este sprint pule la experiencia operativa del usuario:
+
+- Perfil con nombre completo, usuario y datos clave visibles.
+- Cuentas sin banco por defecto, con el limite diario como ajuste editable y el estado en solo lectura.
+- Detalle de movimientos con acceso rapido desde la tabla.
+- Transferencias con busqueda y previsualizacion del destinatario.
+- Pagos QR con copia rapida del token y filtrado por comercios propios.
+- Contactos convertidos en libreta util: guardados manualmente, recientes y busqueda puntual por telefono o cuenta.
+
+## Sprint 5: analitica
+
+El Sprint 5 documenta el dashboard de analitica y sus KPI visibles:
+
+- KPIs simples: ingresos, salidas, balance neto, total de movimientos, recaudacion por QR y ticket promedio.
+- Modo avanzado: focos de gastos, ingresos, comercios, transferencias y QR.
+- Panel lateral con mini KPIs dinamicos segun foco y periodo.
+- Insights rapidos y lista de contrapartes frecuentes.
+- Detalle de comercios con recaudacion por periodo cuando el foco seleccionado es comercios.
 
 ## Configuracion inicial
 

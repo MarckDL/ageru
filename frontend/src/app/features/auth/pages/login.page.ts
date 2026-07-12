@@ -25,15 +25,23 @@ import { AppIconComponent } from '../../../shared/components/app-icon.component'
           {{ mode === 'login' ? 'Inicia sesión en tu cuenta' : 'Crea tu cuenta nueva' }}
         </p>
 
-        <p class="loading-note" *ngIf="loading && mode === 'register'">
+        <p class="loading-note status-note" *ngIf="loading && mode === 'register'">
           Estamos creando tu cuenta, espera un momento...
         </p>
 
+        <p class="msg-success status-note" *ngIf="success">
+          {{ success }}
+        </p>
+
+        <p class="msg-error status-note" *ngIf="error">
+          {{ error }}
+        </p>
+
         <div class="tabs">
-          <button type="button" [class.active]="mode === 'login'" (click)="setMode('login')">
+          <button type="button" [class.active]="mode === 'login'" [disabled]="loading" (click)="setMode('login')">
             Iniciar sesión
           </button>
-          <button type="button" [class.active]="mode === 'register'" (click)="setMode('register')">
+          <button type="button" [class.active]="mode === 'register'" [disabled]="loading" (click)="setMode('register')">
             Registrarme
           </button>
         </div>
@@ -151,16 +159,9 @@ import { AppIconComponent } from '../../../shared/components/app-icon.component'
         <p class="help" *ngIf="mode === 'register'">
           Al terminar, verás una confirmación y luego podrás ir a ingresar.
         </p>
-        <button
-          type="button"
-          class="btn-link"
-          *ngIf="success && mode === 'register'"
-          (click)="setMode('login')"
-        >
+        <button type="button" class="btn-link" *ngIf="success && mode === 'register'" (click)="setMode('login')">
           Ir a ingresar
         </button>
-        <div class="msg-error" *ngIf="error">{{ error }}</div>
-        <div class="msg-success" *ngIf="success">{{ success }}</div>
       </div>
     </div>
   `,
@@ -251,6 +252,9 @@ import { AppIconComponent } from '../../../shared/components/app-icon.component'
       font-size: 0.82rem;
       text-align: center;
     }
+    .status-note {
+      margin-bottom: 0.85rem;
+    }
     .tabs {
       display: flex;
       gap: 0;
@@ -279,6 +283,10 @@ import { AppIconComponent } from '../../../shared/components/app-icon.component'
     }
     .tabs button:not(.active):hover {
       color: var(--text-secondary);
+    }
+    .tabs button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
     }
     .form {
       display: grid;
@@ -365,7 +373,6 @@ import { AppIconComponent } from '../../../shared/components/app-icon.component'
       color: var(--primary-500);
     }
     .msg-error {
-      margin-top: 0.75rem;
       padding: 0.6rem 0.8rem;
       background: var(--error-bg);
       color: var(--error);
@@ -374,7 +381,6 @@ import { AppIconComponent } from '../../../shared/components/app-icon.component'
       text-align: center;
     }
     .msg-success {
-      margin-top: 0.75rem;
       padding: 0.6rem 0.8rem;
       background: var(--success-bg);
       color: var(--success);
@@ -411,7 +417,6 @@ export class LoginPage {
   setMode(mode: 'login' | 'register'): void {
     this.mode = mode;
     this.error = '';
-    this.success = '';
   }
 
   login(): void {
